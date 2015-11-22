@@ -3,9 +3,10 @@
 #include "se/Graphics/Window.h"
 #include "se/Graphics/GraphicsCore.h"
 #include "se/Graphics/GraphicsContext.h"
+#include "se/Graphics/GPUBuffer.h"
 
 #ifndef COMPTR_RELEASE
-	#define COMPTR_RELEASE(p)		if(p) { p->Release(); p = NULL; }
+	#define COMPTR_RELEASE(p)		if(p) { p->Release(); p = nullptr; }
 #endif
 
 #ifndef THROW_IF_FAILED

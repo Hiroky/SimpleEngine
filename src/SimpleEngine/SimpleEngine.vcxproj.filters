@@ -23,6 +23,12 @@
     <ClInclude Include="se\Common.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\Material.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\MeshResource.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -36,6 +42,12 @@
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\GPUBuffer.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\Material.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\MeshResource.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

@@ -24,7 +24,7 @@ namespace se
 		static void Present(uint syncInterval, uint flags);
 		static void SetDefaultRenderTarget();
 
-		static ID3D11Device* GetD3DDevice() { return device_; }
+		static ID3D11Device* GetDevice() { return device_; }
 		static ID3D11DeviceContext* GetContext() { return deviceContext_; }
 		static ID3D11RenderTargetView* GetRenderTarget() { return renderTargetView_; }
 		static ID3D11DepthStencilView* GetDepthStencilView() { return depthStencilView_; }

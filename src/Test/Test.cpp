@@ -21,6 +21,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			se::GraphicsCore::Present(1, 0);
 		}
 	}
+
 	se::GraphicsCore::Finalize();
 
     return (int) msg.wParam;
