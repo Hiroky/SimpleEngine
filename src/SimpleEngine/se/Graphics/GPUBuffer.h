@@ -87,4 +87,14 @@ namespace se
 		void DestroyBuffer();
 	};
 
+
+	//
+	// ピクセルバッファ(テクスチャ)
+	//
+	class PixelBuffer : public GPUBuffer
+	{
+	};
+
+
+
 }

@@ -7,36 +7,23 @@ namespace se
 		//ウインドウプロシージャ
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wp, LPARAM lp)
 		{
-			switch (uMsg) {
-			case WM_PAINT:
+			switch (uMsg) 
 			{
-				PAINTSTRUCT ps;
-				HDC hdc;
-				hdc = BeginPaint(hWnd, &ps);
-				EndPaint(hWnd, &ps);
-			}
-			break;
-
 			case WM_DESTROY:
-			{
-				PostQuitMessage(0);
-			}
-			break;
-
-			default:
-			{
-				/* DO_NOTHING */
-			}
-			break;
+				::PostQuitMessage(0);
+				break;
+			case WM_CLOSE:
+				::DestroyWindow(hWnd);
+				break;
 			}
 
-			return DefWindowProc(hWnd, uMsg, wp, lp);
+			return ::DefWindowProc(hWnd, uMsg, wp, lp);
 		}
 	}
 
 
-	HINSTANCE Window::hInst_;				// インスタンスハンドル
-	HWND Window::hWnd_;					// ウィンドウハンドル
+	HINSTANCE Window::hInst_;		// インスタンスハンドル
+	HWND Window::hWnd_;				// ウィンドウハンドル
 
 
 	void Window::Initialize(HINSTANCE hInst, int width, int height, const wchar_t* title)
@@ -51,12 +38,12 @@ namespace se
 		wc.hInstance = hInst;
 		wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-		wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+		wc.hbrBackground = NULL;
 		wc.lpszMenuName = NULL;
 		wc.lpszClassName = title;
 		wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
-		if (!RegisterClassEx(&wc)) {
+		if (!::RegisterClassEx(&wc)) {
 			throw;
 		}
 
@@ -65,10 +52,10 @@ namespace se
 
 		// ウィンドウサイズの設定
 		RECT rc = { 0, 0, width, height };
-		AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+		::AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
 		// ウィンドウの生成
-		hWnd_ = CreateWindow(
+		hWnd_ = ::CreateWindow(
 			title,
 			title,
 			WS_OVERLAPPEDWINDOW & ~(WS_THICKFRAME | WS_MAXIMIZEBOX),
@@ -89,19 +76,37 @@ namespace se
 
 	void Window::Show()
 	{
-		ShowWindow(hWnd_, SW_SHOWDEFAULT);
+		::ShowWindow(hWnd_, SW_SHOWDEFAULT);
 	}
 
 
 	bool Window::IsActive()
 	{
-		return hWnd_ == GetActiveWindow();
+		return hWnd_ == ::GetActiveWindow();
 	}
 
 
 	void Window::SetWindowTitle(const wchar_t* name)
 	{
-		SetWindowText(hWnd_, name);
+		::SetWindowText(hWnd_, name);
+	}
+
+	bool Window::IsMinimized()
+	{
+		return ::IsIconic(hWnd_) == TRUE;
+	}
+
+	bool Window::IsAlive()
+	{
+		return ::IsWindow(hWnd_) == TRUE;
+	}
+
+	void Window::MessageLoop(MSG msg)
+	{
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
 }

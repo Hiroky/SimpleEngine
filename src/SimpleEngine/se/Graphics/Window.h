@@ -19,6 +19,9 @@ namespace se
 		static void Show();
 		static bool IsActive();
 		static void SetWindowTitle(const wchar_t* name);
+		static bool IsMinimized();
+		static bool IsAlive();
+		static void MessageLoop(MSG msg);
 
 		static HWND GetHWND() { return hWnd_; }
 	};

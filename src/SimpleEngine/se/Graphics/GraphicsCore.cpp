@@ -84,14 +84,6 @@ namespace se
 		}
 		THROW_IF_FAILED(hr)
 
-#ifdef USE_DEFERRED_CONTEXT
-		hr = m_pDevice->CreateDeferredContext(0, &m_pDeferredContext);
-		if (FAILED(hr)) {
-			// 作成に失敗したら終了
-			return false;
-		}
-#endif
-
 		// バックバッファ取得
 		ID3D11Texture2D* pBackBuffer = NULL;
 		hr = swapChain_->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
@@ -131,13 +123,8 @@ namespace se
 		THROW_IF_FAILED(hr)
 
 		//設定
-#ifdef USE_DEFERRED_CONTEXT
-		m_pDeferredContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
-		m_pDeferredContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-#else
 		deviceContext->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-#endif
 
 		immediateContext_.Initialize(deviceContext);
 
@@ -177,20 +164,8 @@ namespace se
 
 	void GraphicsCore::Present(uint syncInterval, uint flags)
 	{
-		// フリップ処理
 		swapChain_->Present(syncInterval, flags);
-
-
-#ifdef USE_DEFERRED_CONTEXT
-		//	フリップ直後にキックしてみる
-		ID3D11CommandList* pCmd = NULL;
-		HRESULT hr = m_pDeferredContext->FinishCommandList(TRUE, &pCmd);
-		KS_ASSERT(SUCCEEDED(hr));
-		m_pDeviceContext->ExecuteCommandList(pCmd, FALSE);
-		SAFE_RELEASE(pCmd);
-#endif
 	}
-
 
 	void GraphicsCore::SetDefaultRenderTarget()
 	{
