@@ -45,7 +45,7 @@ namespace se
 		ID3D11Resource* GetResource() { return resource_; }
 
 		template <class T>
-		T* Get() { return static_cast<T*>(resource_); }
+		T* Get() const { return static_cast<T*>(resource_); }
 	};
 
 
@@ -64,6 +64,7 @@ namespace se
 
 		void CreateBuffer(const VertexBufferDesc& desc);
 		void DestroyBuffer();
+		uint GetStride() const { return stride_; }
 	};
 
 

@@ -4,6 +4,7 @@
 #include "se/Graphics/GraphicsCore.h"
 #include "se/Graphics/GraphicsContext.h"
 #include "se/Graphics/GPUBuffer.h"
+#include "se/Graphics/Shader.h"
 
 #ifndef COMPTR_RELEASE
 	#define COMPTR_RELEASE(p)		if(p) { p->Release(); p = nullptr; }

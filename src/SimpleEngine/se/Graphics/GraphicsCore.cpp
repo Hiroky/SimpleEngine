@@ -6,11 +6,11 @@ namespace se
 	D3D_DRIVER_TYPE			GraphicsCore::driverType_;	
 	D3D_FEATURE_LEVEL		GraphicsCore::featureLevel_;
 	ID3D11Device*			GraphicsCore::device_;
-	ID3D11DeviceContext*	GraphicsCore::deviceContext_;
 	IDXGISwapChain*			GraphicsCore::swapChain_;
 	ID3D11RenderTargetView* GraphicsCore::renderTargetView_;
 	ID3D11Texture2D*        GraphicsCore::depthStencil_;
 	ID3D11DepthStencilView* GraphicsCore::depthStencilView_;
+	GraphicsContext			GraphicsCore::immediateContext_;
 
 
 	void GraphicsCore::Initialize()
@@ -58,6 +58,8 @@ namespace se
 		sd.SampleDesc.Quality = 0;
 		sd.Windowed = TRUE;
 
+		ID3D11DeviceContext* deviceContext;
+
 		// デバイスとスワップチェインを作成する
 		for (UINT idx = 0; idx < numDriverTypes; idx++) {
 			driverType_ = driverTypes[idx];
@@ -73,7 +75,7 @@ namespace se
 				&swapChain_,
 				&device_,
 				&featureLevel_,
-				&deviceContext_);
+				&deviceContext);
 
 			if (SUCCEEDED(hr)) {
 				// 成功したらループ脱出
@@ -133,31 +135,48 @@ namespace se
 		m_pDeferredContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView);
 		m_pDeferredContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 #else
-		deviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
-		deviceContext_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		deviceContext->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
+		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 #endif
+
+		immediateContext_.Initialize(deviceContext);
+
+		// 仮
+		D3D11_VIEWPORT vp;
+		vp.Width = width;
+		vp.Height = height;
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		vp.TopLeftX = 0;
+		vp.TopLeftY = 0;
+		deviceContext->RSSetViewports(1, &vp);
+
+		D3D11_RASTERIZER_DESC rsDesc;
+		ZeroMemory(&rsDesc, sizeof(D3D11_RASTERIZER_DESC));
+		rsDesc.CullMode = D3D11_CULL_NONE;
+		rsDesc.FrontCounterClockwise = TRUE;
+		rsDesc.FillMode = D3D11_FILL_SOLID;
+		rsDesc.DepthClipEnable = TRUE;
+		ID3D11RasterizerState* rs;
+		hr = device_->CreateRasterizerState(&rsDesc, &rs);
+		THROW_IF_FAILED(hr);
+		deviceContext->RSSetState(rs);
+		COMPTR_RELEASE(rs);
 	}
 
 
 	void GraphicsCore::Finalize()
 	{
-		if (deviceContext_) {
-			deviceContext_->ClearState();
-		}
 		COMPTR_RELEASE(depthStencilView_);
 		COMPTR_RELEASE(depthStencil_);
 		COMPTR_RELEASE(renderTargetView_);
 		COMPTR_RELEASE(swapChain_);
-		COMPTR_RELEASE(deviceContext_);
 		COMPTR_RELEASE(device_);
 	}
 
 
 	void GraphicsCore::Present(uint syncInterval, uint flags)
 	{
-		float color[4] = { 0.3f, 0.4f, 0.9f, 1.0f };
-		deviceContext_->ClearRenderTargetView(renderTargetView_, color);
-
 		// フリップ処理
 		swapChain_->Present(syncInterval, flags);
 
@@ -175,7 +194,14 @@ namespace se
 
 	void GraphicsCore::SetDefaultRenderTarget()
 	{
-		deviceContext_->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
+		immediateContext_.GetDeviceContext()->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
+	}
+
+	void GraphicsCore::ClearRenderTarget()
+	{
+		float color[4] = { 0.3f, 0.4f, 0.9f, 1.0f };
+		immediateContext_.GetDeviceContext()->ClearRenderTargetView(renderTargetView_, color);
+		immediateContext_.GetDeviceContext()->ClearDepthStencilView(depthStencilView_, D3D11_CLEAR_DEPTH, 1, 0);
 	}
 
 }
