@@ -130,8 +130,8 @@ namespace se
 
 		// 仮
 		D3D11_VIEWPORT vp;
-		vp.Width = width;
-		vp.Height = height;
+		vp.Width = static_cast<float>(width);
+		vp.Height = static_cast<float>(height);
 		vp.MinDepth = 0.0f;
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0;

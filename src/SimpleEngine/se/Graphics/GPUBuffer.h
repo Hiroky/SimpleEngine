@@ -28,21 +28,26 @@ namespace se
 
 
 	//
-	// GPUで使用されるバッファ
+	// GPUで使用されるリソース
 	//
-	class GPUBuffer
+	class GPUResource
 	{
 	protected:
-		ID3D11Resource*		resource_;
+		ID3D11Resource*				resource_;
+		ID3D11ShaderResourceView*	srv_;
+		ID3D11UnorderedAccessView*	uav_;
+
 
 	protected:
 		void Destroy();
 
 	public:
-		GPUBuffer();
-		virtual ~GPUBuffer();
+		GPUResource();
+		virtual ~GPUResource();
 
-		ID3D11Resource* GetResource() { return resource_; }
+		ID3D11Resource* GetResource() const { return resource_; }
+		ID3D11ShaderResourceView* GetSRV() const { return srv_; }
+		ID3D11UnorderedAccessView* GetUAV() const { return uav_; }
 
 		template <class T>
 		T* Get() const { return static_cast<T*>(resource_); }
@@ -53,14 +58,14 @@ namespace se
 	//
 	// 頂点バッファ
 	//
-	class VertexBuffer : public GPUBuffer
+	class VertexBuffer : public GPUResource
 	{
 	private:
 		uint stride_;
 
 	public:
 		VertexBuffer();
-		~VertexBuffer();
+		virtual ~VertexBuffer();
 
 		void CreateBuffer(const VertexBufferDesc& desc);
 		void DestroyBuffer();
@@ -72,7 +77,7 @@ namespace se
 	//
 	// インデックスバッファ
 	//
-	class IndexBuffer : public GPUBuffer
+	class IndexBuffer : public GPUResource
 	{
 	private:
 		IndexBufferStride stride_;
@@ -81,7 +86,7 @@ namespace se
 
 	public:
 		IndexBuffer();
-		~IndexBuffer();
+		virtual ~IndexBuffer();
 
 		void CreateBuffer(const void* data, uint size, IndexBufferStride stride);
 		void DestroyBuffer();
@@ -89,12 +94,68 @@ namespace se
 
 
 	//
-	// ピクセルバッファ(テクスチャ)
+	// ピクセルバッファ
 	//
-	class PixelBuffer : public GPUBuffer
+	class PixelBuffer : public GPUResource
 	{
+	protected:
+		uint width_;
+		uint height_;
+		uint depth_;
+		uint format_;	// TODO:フォーマットEnum定義
+
+	public:
+		PixelBuffer();
+		virtual ~PixelBuffer();
+
+		uint GetWidth() const { return width_; }
+		uint GetHeight() const { return height_; }
+		uint GetDepth() const { return depth_; }
 	};
 
 
 
+	//
+	// カラーバッファ
+	//
+	class ColorBuffer : public PixelBuffer
+	{
+	private:
+		ID3D11RenderTargetView** rtvs_;
+	public:
+		ColorBuffer();
+		virtual ~ColorBuffer();
+
+		ID3D11RenderTargetView* GetRTV(uint index = 0) const { return rtvs_[index]; }
+	};
+
+
+	//
+	// デプスステンシルバッファ
+	//
+	class DepthStencilBuffer : public PixelBuffer
+	{
+	private:
+		ID3D11DepthStencilView* dsv_;
+
+	public:
+		DepthStencilBuffer();
+		virtual ~DepthStencilBuffer();
+
+		ID3D11DepthStencilView* GetDSV() const { return dsv_; }
+	};
+
+
+	//
+	// テクスチャリソース
+	//
+	class Texture : PixelBuffer
+	{
+	public:
+		Texture();
+		virtual ~Texture();
+
+		void LoadFromFile(const char* fileName);
+		void LoadFromMemory(const void* data, uint size);
+	};
 }

@@ -163,6 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="se\engine.h" />
+    <ClInclude Include="se\Graphics\DDSTextureLoader.h" />
     <ClInclude Include="se\Graphics\MeshResource.h" />
     <ClInclude Include="se\Graphics\GPUBuffer.h" />
     <ClInclude Include="se\Graphics\Graphics.h" />
@@ -172,9 +173,11 @@
     <ClInclude Include="se\Graphics\Shader.h" />
     <ClInclude Include="se\Graphics\Window.h" />
     <ClInclude Include="se\Common.h" />
+    <ClInclude Include="se\Math\Vector.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="se\Graphics\DDSTextureLoader.cpp" />
     <ClCompile Include="se\Graphics\MeshResource.cpp" />
     <ClCompile Include="se\Graphics\GPUBuffer.cpp" />
     <ClCompile Include="se\Graphics\GraphicsContext.cpp" />
@@ -182,6 +185,7 @@
     <ClCompile Include="se\Graphics\Material.cpp" />
     <ClCompile Include="se\Graphics\Shader.cpp" />
     <ClCompile Include="se\Graphics\Window.cpp" />
+    <ClCompile Include="se\Math\Vector.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

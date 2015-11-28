@@ -1,25 +1,34 @@
 ﻿#include "se/Graphics/GraphicsContext.h"
-#include "GPUBuffer.h"
+#include "se/Graphics/GPUBuffer.h"
+#include "se/Graphics/DDSTextureLoader.h"
 
 
 namespace se
 {
-	GPUBuffer::GPUBuffer()
+#pragma region GPUResource
+
+	GPUResource::GPUResource()
 		: resource_(nullptr)
+		, srv_(nullptr)
+		, uav_(nullptr)
 	{
 	}
 
-	GPUBuffer::~GPUBuffer()
+	GPUResource::~GPUResource()
 	{
 		Destroy();
 	}
 
-	void GPUBuffer::Destroy()
+	void GPUResource::Destroy()
 	{
+		COMPTR_RELEASE(srv_);
+		COMPTR_RELEASE(uav_);
 		COMPTR_RELEASE(resource_);
 	}
 
+#pragma endregion
 
+#pragma region VertexBuffer
 
 	VertexBuffer::VertexBuffer()
 		: stride_(0)
@@ -79,10 +88,12 @@ namespace se
 
 	void VertexBuffer::DestroyBuffer()
 	{
-		GPUBuffer::Destroy();
+		GPUResource::Destroy();
 	}
 
+#pragma endregion
 
+#pragma region IndexBuffer
 
 	IndexBuffer::IndexBuffer()
 	{
@@ -111,6 +122,70 @@ namespace se
 
 	void IndexBuffer::DestroyBuffer()
 	{
-		GPUBuffer::Destroy();
+		GPUResource::Destroy();
 	}
+
+#pragma endregion
+
+#pragma region PixelBuffer
+
+	PixelBuffer::PixelBuffer()
+		: width_(0)
+		, height_(0)
+		, depth_(0)
+		, format_(0)
+	{
+	}
+	PixelBuffer::~PixelBuffer()
+	{
+	}
+
+#pragma endregion
+
+#pragma region ColorBuffer
+
+	ColorBuffer::ColorBuffer()
+	{
+	}
+	ColorBuffer::~ColorBuffer()
+	{
+	}
+
+#pragma endregion
+
+#pragma region DepthStencilBuffer
+
+	DepthStencilBuffer::DepthStencilBuffer()
+	{
+	}
+
+	DepthStencilBuffer::~DepthStencilBuffer()
+	{
+	}
+
+#pragma endregion
+
+#pragma region Texture
+
+	Texture::Texture()
+	{
+	}
+	Texture::~Texture()
+	{
+	}
+
+	void Texture::LoadFromFile(const char* fileName)
+	{
+		wchar_t buffer[255] = { 0 };
+		size_t size;
+		mbstowcs_s(&size, buffer, fileName, sizeof(buffer));
+		DirectX::CreateDDSTextureFromFile(GraphicsCore::GetDevice(), buffer, &resource_, &srv_);
+	}
+
+	void Texture::LoadFromMemory(const void * data, uint size)
+	{
+		DirectX::CreateDDSTextureFromMemory(GraphicsCore::GetDevice(), reinterpret_cast<const byte*>(data), static_cast<size_t>(size), &resource_, &srv_);
+	}
+
+#pragma endregion
 }

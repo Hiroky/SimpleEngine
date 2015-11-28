@@ -51,6 +51,18 @@ namespace se
 		deviceContext_->IASetIndexBuffer(ib->Get<ID3D11Buffer>(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
+	void GraphicsContext::SetVSResource(uint slot, const GPUResource* resource)
+	{
+		ID3D11ShaderResourceView* resources[] = { resource->GetSRV() };
+		deviceContext_->VSSetShaderResources(slot, 1, resources);
+	}
+
+	void GraphicsContext::SetPSResource(uint slot, const GPUResource* resource)
+	{
+		ID3D11ShaderResourceView* resources[] = { resource->GetSRV() };
+		deviceContext_->PSSetShaderResources(slot, 1, resources);
+	}
+
 	void GraphicsContext::DrawIndexed(uint indexStart, uint indexCount)
 	{
 		deviceContext_->DrawIndexed(indexCount, indexStart, 0);

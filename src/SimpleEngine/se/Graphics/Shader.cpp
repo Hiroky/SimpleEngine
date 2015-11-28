@@ -17,7 +17,7 @@ namespace se
 			ID3DBlob* pErrorBlob;
 			size_t size = 0;
 			wchar_t buffer[128] = { 0 };
-			int chr_len = strlen(szFileName) + 1;
+			size_t chr_len = strlen(szFileName) + 1;
 			mbstowcs_s(&size, buffer, chr_len, szFileName, _TRUNCATE);
 
 			// シェーダをファイルからコンパイル
@@ -94,7 +94,7 @@ namespace se
 	}
 
 
-	void ShaderReflection::Create(void* data, uint size)
+	void ShaderReflection::Create(void* data, size_t size)
 	{
 		HRESULT hr = D3DReflect(data, size, IID_ID3D11ShaderReflection, (void**)&reflection_);
 		THROW_IF_FAILED(hr);
@@ -219,7 +219,7 @@ namespace se
 		COMPTR_RELEASE(inputLayout_);
 	}
 
-	void VertexShader::CreateInputLayout(const void * data, int size)
+	void VertexShader::CreateInputLayout(const void * data, size_t size)
 	{
 		// 仮
 		D3D11_INPUT_ELEMENT_DESC layout[] = {

@@ -6,7 +6,7 @@ namespace se
 {
 	class VertexShader;
 	class PixelShader;
-	class GPUBuffer;
+	class GPUResource;
 	class VertexBuffer;
 	class IndexBuffer;
 
@@ -29,6 +29,10 @@ namespace se
 		void SetPixelShader(const PixelShader& shader);
 		void SetVertexBuffer(int slot, const VertexBuffer* vb);
 		void SetIndexBuffer(const IndexBuffer* ib);
+
+		void SetVSResource(uint slot, const GPUResource* resource);
+		void SetPSResource(uint slot, const GPUResource* resource);
+
 
 		void DrawIndexed(uint indexStart, uint indexCount);
 	};

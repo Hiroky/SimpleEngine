@@ -16,7 +16,7 @@ namespace se
 		ShaderReflection();
 		~ShaderReflection();
 
-		void Create(void* data, uint size);
+		void Create(void* data, size_t size);
 		uint GetVertexLayoutAttribute();
 		bool FindConstantBufferByName(const char* name, uint* out_bindIndex);
 		bool FindUniformVariableByName(const char* name, uint* out_offset = NULL, uint* size = NULL);
@@ -36,7 +36,7 @@ namespace se
 		ID3D11InputLayout* inputLayout_;
 
 	private:
-		void CreateInputLayout(const void* data, int size);
+		void CreateInputLayout(const void* data, size_t size);
 
 	public:
 		VertexShader();
