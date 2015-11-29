@@ -223,12 +223,13 @@ namespace se
 		useCount_ = 0;
 	}
 
-	ID3D11InputLayout * VertexLayoutManager::GetLayout(VertexShader * shader, uint vertexAttr)
+	ID3D11InputLayout * VertexLayoutManager::GetLayout(const VertexShader& shader, uint vertexAttr)
 	{
+		// 既存データから検索
 		uint i;
 		for (i = 0; i < useCount_; i++) {
 			if (vertexAttr == attributeSet_[i].vertexAttr
-				//|| shader->GetVertexAttr() == attributeSet_[i].shaderAttr
+				|| shader.GetVertexAttribute() == attributeSet_[i].shaderAttr
 				) {
 				break;
 			}
@@ -257,6 +258,30 @@ namespace se
 				offset += 16;
 				count++;
 			}
+			if (vertexAttr & VERTEX_ATTR_TEXCOORD0) {
+				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 8;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_TEXCOORD1) {
+				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 8;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_TEXCOORD2) {
+				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 8;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_TEXCOORD3) {
+				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 8;
+				count++;
+			}
 			if (vertexAttr & VERTEX_ATTR_TANGENT) {
 				D3D11_INPUT_ELEMENT_DESC t = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 				desc[count] = t;
@@ -282,8 +307,10 @@ namespace se
 				count++;
 			}
 
-			//HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(desc, count, data, size, &layouts_[useCount_]);
-			//THROW_IF_FAILED(hr);
+			HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(desc, count, shader.GetByteCode(), shader.GetBiteCodeSize(), &layouts_[useCount_]);
+			THROW_IF_FAILED(hr);
+			attributeSet_[useCount_].shaderAttr = shader.GetVertexAttribute();
+			attributeSet_[useCount_].vertexAttr = vertexAttr;
 			useCount_++;
 		}
 
@@ -294,7 +321,6 @@ namespace se
 
 	VertexShader::VertexShader()
 		: shader_(nullptr)
-		, inputLayout_(nullptr)
 		, blob_(nullptr)
 		, data_(nullptr)
 		, dataSize_(0)
@@ -304,32 +330,19 @@ namespace se
 	VertexShader::~VertexShader()
 	{
 		COMPTR_RELEASE(shader_);
-		COMPTR_RELEASE(inputLayout_);
 		COMPTR_RELEASE(blob_);
 	}
 
-	void VertexShader::CreateInputLayout(const void * data, size_t size)
-	{
-		// 仮
-		D3D11_INPUT_ELEMENT_DESC layout[] = {
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		};
-		HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(
-			layout,
-			2,
-			data,
-			size,
-			&inputLayout_);
-	}
-
-	void VertexShader::CreateFromByteCode(void* data, int size, ShaderReflection* reflection)
+	void VertexShader::CreateFromByteCode(const void* data, int size, ShaderReflection* reflection)
 	{
 		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(data, size, nullptr, &shader_);
 		THROW_IF_FAILED(hr);
 		data_ = data;
 		dataSize_ = size;
-		CreateInputLayout(data, size);
+
+		ShaderReflection ref;
+		ref.Create(data_, dataSize_);
+		vertexAttribute_ = ref.GetVertexLayoutAttribute();
 
 		if (reflection) {
 			reflection->Create(data, size);
@@ -343,7 +356,10 @@ namespace se
 		THROW_IF_FAILED(hr);
 		data_ = blob_->GetBufferPointer();
 		dataSize_ = blob_->GetBufferSize();
-		CreateInputLayout(data_, dataSize_);
+
+		ShaderReflection ref;
+		ref.Create(data_, dataSize_);
+		vertexAttribute_ = ref.GetVertexLayoutAttribute();
 
 		if (reflection) {
 			reflection->Create(data_, dataSize_);
@@ -357,7 +373,10 @@ namespace se
 		THROW_IF_FAILED(hr);
 		data_ = blob_->GetBufferPointer();
 		dataSize_ = blob_->GetBufferSize();
-		CreateInputLayout(data_, dataSize_);
+
+		ShaderReflection ref;
+		ref.Create(data_, dataSize_);
+		vertexAttribute_ = ref.GetVertexLayoutAttribute();
 
 		if (reflection) {
 			reflection->Create(data_, dataSize_);
@@ -377,7 +396,7 @@ namespace se
 		COMPTR_RELEASE(shader_);
 	}
 
-	void PixelShader::CreateFromByteCode(void* data, int size, ShaderReflection* reflection)
+	void PixelShader::CreateFromByteCode(const void* data, int size, ShaderReflection* reflection)
 	{
 		HRESULT hr = GraphicsCore::GetDevice()->CreatePixelShader(data, size, nullptr, &shader_);
 		THROW_IF_FAILED(hr);

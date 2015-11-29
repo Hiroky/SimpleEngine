@@ -10,10 +10,7 @@ namespace se
 
 	GraphicsContext::~GraphicsContext()
 	{
-		if (deviceContext_) {
-			deviceContext_->ClearState();
-		}
-		COMPTR_RELEASE(deviceContext_);
+		assert(!deviceContext_);
 	}
 
 	void GraphicsContext::Initialize(ID3D11DeviceContext * context)
@@ -21,12 +18,17 @@ namespace se
 		deviceContext_ = context;
 	}
 
+	void GraphicsContext::Finalize()
+	{
+		if (deviceContext_) {
+			deviceContext_->ClearState();
+		}
+		COMPTR_RELEASE(deviceContext_);
+	}
+
 	void GraphicsContext::SetVertexShader(const VertexShader& shader)
 	{
 		deviceContext_->VSSetShader(shader.Get(), nullptr, 0);
-
-		// ひとまずここでレイアウトもセットしておく
-		deviceContext_->IASetInputLayout(shader.inputLayout_);
 	}
 
 	void GraphicsContext::SetPixelShader(const PixelShader& shader)
@@ -44,6 +46,9 @@ namespace se
 		uint stride = vb->GetStride();
 		uint offset = 0;
 		deviceContext_->IASetVertexBuffers(slot, 1, buffers, &stride, &offset);
+
+		// レイアウト
+		deviceContext_->IASetInputLayout(vb->GetLayout());
 	}
 
 	void GraphicsContext::SetIndexBuffer(const IndexBuffer* ib)

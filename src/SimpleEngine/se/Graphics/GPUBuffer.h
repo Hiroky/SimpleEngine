@@ -21,7 +21,7 @@ namespace se
 	{
 		const void* data;
 		uint size;
-		uint stride;
+		uint attributes;
 		bool canUnorderedAccess;
 		BufferUsage usage;
 	};
@@ -53,8 +53,7 @@ namespace se
 		T* Get() const { return static_cast<T*>(resource_); }
 	};
 
-
-
+	
 	//
 	// 頂点バッファ
 	//
@@ -71,12 +70,14 @@ namespace se
 
 		void CreateBuffer(const VertexBufferDesc& desc);
 		void DestroyBuffer();
+		void SetupVertexLayout(const VertexShader& shader);
+
+		ID3D11InputLayout* GetLayout() const { return layout_; };
 		uint GetStride() const { return stride_; }
 		uint GetAttributes() const { return attributes_; }
 	};
 
-
-
+	
 	//
 	// インデックスバッファ
 	//
@@ -115,8 +116,7 @@ namespace se
 		uint GetHeight() const { return height_; }
 		uint GetDepth() const { return depth_; }
 	};
-
-
+	
 
 	//
 	// カラーバッファ

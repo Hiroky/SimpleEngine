@@ -149,11 +149,17 @@ namespace se
 		THROW_IF_FAILED(hr);
 		deviceContext->RSSetState(rs);
 		COMPTR_RELEASE(rs);
+
+		// TODO:シェーダ系のマネージャができたらそちらに移す
+		VertexLayoutManager::Initialize();
 	}
 
 
 	void GraphicsCore::Finalize()
 	{
+		VertexLayoutManager::Finalize();
+
+		immediateContext_.Finalize();
 		COMPTR_RELEASE(depthStencilView_);
 		COMPTR_RELEASE(depthStencil_);
 		COMPTR_RELEASE(renderTargetView_);

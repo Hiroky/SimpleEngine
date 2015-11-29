@@ -30,6 +30,26 @@ namespace se
 
 #pragma region VertexBuffer
 
+	namespace
+	{
+		uint ComputeVertexStride(uint attr)
+		{
+			uint size = 0;
+			if (attr & VERTEX_ATTR_POSITION) size += 12;
+			if (attr & VERTEX_ATTR_NORMAL) size += 12;
+			if (attr & VERTEX_ATTR_COLOR) size += 16;
+			if (attr & VERTEX_ATTR_TEXCOORD0) size += 8;
+			if (attr & VERTEX_ATTR_TEXCOORD1) size += 8;
+			if (attr & VERTEX_ATTR_TEXCOORD2) size += 8;
+			if (attr & VERTEX_ATTR_TEXCOORD3) size += 8;
+			if (attr & VERTEX_ATTR_TANGENT) size += 12;
+			if (attr & VERTEX_ATTR_BITANGENT) size += 12;
+			if (attr & VERTEX_ATTR_BLENDWEIGHT) size += 16;
+			if (attr & VERTEX_ATTR_BLENDINDECES) size += 4;
+			return size;
+		}
+	}
+
 	VertexBuffer::VertexBuffer()
 		: layout_(nullptr)
 		, stride_(0)
@@ -39,7 +59,7 @@ namespace se
 
 	VertexBuffer::~VertexBuffer()
 	{
-		COMPTR_RELEASE(layout_);
+		layout_ = nullptr;
 	}
 
 	void VertexBuffer::CreateBuffer(const VertexBufferDesc& desc)
@@ -72,15 +92,17 @@ namespace se
 		ID3D11Buffer* buffer;
 		HRESULT hr = GraphicsCore::GetDevice()->CreateBuffer(&bd, pInit, &buffer);
 		THROW_IF_FAILED(hr);
+
 		resource_ = buffer;
-		stride_ = desc.stride;
+		stride_ = ComputeVertexStride(desc.attributes);
+		attributes_ = desc.attributes;
 
 		// アンオーダードアクセスビューを生成
 		if (desc.canUnorderedAccess) {
 			D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
 			uavDesc.Buffer.FirstElement = 0;
 			uavDesc.Buffer.Flags = 0;
-			uavDesc.Buffer.NumElements = desc.size / desc.stride;
+			uavDesc.Buffer.NumElements = desc.size / stride_;
 			uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 			uavDesc.Format = DXGI_FORMAT_R32_UINT;
 			//hr = GraphicsCore::GetDevice()->CreateUnorderedAccessView(resource_, &uavDesc, &m_pUnorderedAccessView);
@@ -92,6 +114,12 @@ namespace se
 	void VertexBuffer::DestroyBuffer()
 	{
 		GPUResource::Destroy();
+	}
+
+	void VertexBuffer::SetupVertexLayout(const VertexShader& shader)
+	{
+		layout_ = VertexLayoutManager::GetLayout(shader, attributes_);
+		assert(layout_);
 	}
 
 #pragma endregion

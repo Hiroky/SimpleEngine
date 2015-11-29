@@ -9,9 +9,9 @@ namespace se
 	class MeshResource
 	{
 	private:
-		VertexBuffer vertexBuffer_;
-		IndexBuffer indexBuffer_;
-		Material material_;
+		VertexBuffer* vertexBuffer_;
+		IndexBuffer* indexBuffer_;
+		Material* material_;
 
 	public:
 		MeshResource();

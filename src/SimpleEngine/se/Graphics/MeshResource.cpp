@@ -5,8 +5,12 @@
 namespace se
 {
 	MeshResource::MeshResource()
+		: vertexBuffer_(nullptr)
+		, indexBuffer_(nullptr)
+		, material_(nullptr)
 	{
 	}
+
 	MeshResource::~MeshResource()
 	{
 	}

@@ -23,6 +23,7 @@ namespace se
 		GraphicsContext();
 		~GraphicsContext();
 		void Initialize(ID3D11DeviceContext* context);
+		void Finalize();
 		ID3D11DeviceContext* GetDeviceContext() { return deviceContext_; }
 
 		void SetVertexShader(const VertexShader& shader);
@@ -32,7 +33,6 @@ namespace se
 
 		void SetVSResource(uint slot, const GPUResource* resource);
 		void SetPSResource(uint slot, const GPUResource* resource);
-
 
 		void DrawIndexed(uint indexStart, uint indexCount);
 	};

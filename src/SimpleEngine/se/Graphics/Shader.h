@@ -41,10 +41,10 @@ namespace se
 		static uint useCount_;
 
 	public:
-		void Initialize();
-		void Finalize();
+		static void Initialize();
+		static void Finalize();
 
-		ID3D11InputLayout* GetLayout(VertexShader* shader, uint vertexAttr);
+		static ID3D11InputLayout* GetLayout(const VertexShader& shader, uint vertexAttr);
 	};
 
 	//
@@ -56,20 +56,20 @@ namespace se
 
 	private:
 		ID3D11VertexShader* shader_;
-		ID3D11InputLayout* inputLayout_;
+		uint vertexAttribute_;
 		ID3DBlob* blob_;
 		const void* data_;
 		size_t dataSize_;
-
-	private:
-		void CreateInputLayout(const void* data, size_t size);
 
 	public:
 		VertexShader();
 		~VertexShader();
 
 		ID3D11VertexShader* Get() const { return shader_; }
-		void CreateFromByteCode(void* data, int size, ShaderReflection* reflection = nullptr);
+		const void* GetByteCode() const { return data_; }
+		size_t GetBiteCodeSize() const { return dataSize_; }
+		uint GetVertexAttribute() const { return vertexAttribute_; }
+		void CreateFromByteCode(const void* data, int size, ShaderReflection* reflection = nullptr);
 		void CompileFromFile(const char* fileName, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 		void CompileFromString(const char* source, int length, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 	};
@@ -89,7 +89,7 @@ namespace se
 		~PixelShader();
 
 		ID3D11PixelShader* Get() const { return shader_; }
-		void CreateFromByteCode(void* data, int size, ShaderReflection* reflection = nullptr);
+		void CreateFromByteCode(const void* data, int size, ShaderReflection* reflection = nullptr);
 		void CompileFromFile(const char* fileName, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 		void CompileFromString(const char* source, int length, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 	};

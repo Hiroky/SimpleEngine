@@ -56,16 +56,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	shader.PSCompileFromString(ps_string, static_cast<int>(strlen(ps_string)));
 
 	Vertex vertex[] = {
-		{ se::float3(0, 1, 0), se::float2(0.5f, 0.0f) },
-		{ se::float3(-0.5f, -1.0f, 0), se::float2(0.0f, 1.0f) },
-		{ se::float3(0.5f, -1.0f, 0), se::float2(1.0f, 1.0f) },
+		{ se::float3(0, 0.8f, 0), se::float2(0.5f, 0.0f) },
+		{ se::float3(-0.5f, -0.8f, 0), se::float2(0.0f, 1.0f) },
+		{ se::float3(0.5f, -0.8f, 0), se::float2(1.0f, 1.0f) },
 	};
 	uint index[] = { 0, 1, 2 };
 	se::VertexBuffer vertexBuffer;
-	se::VertexBufferDesc vbdesc = { vertex, sizeof(vertex), sizeof(Vertex), false, se::BUFFER_USAGE_IMMUTABLE };
+	se::VertexBufferDesc vbdesc = { 
+		vertex,
+		sizeof(vertex),
+		se::VERTEX_ATTR_POSITION | se::VERTEX_ATTR_TEXCOORD0,
+		false,
+		se::BUFFER_USAGE_IMMUTABLE 
+	};
 	vertexBuffer.CreateBuffer(vbdesc);
+	vertexBuffer.SetupVertexLayout(*shader.GetVS());
 	se::IndexBuffer indexBuffer;
 	indexBuffer.CreateBuffer(index, sizeof(index), se::INDEX_BUFFER_STRIDE_U32);
+
 	se::Texture texture;
 	//texture.LoadFromFile("test.dds");
 
@@ -89,6 +97,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	se::GraphicsCore::Finalize();
-
     return (int) msg.wParam;
 }
