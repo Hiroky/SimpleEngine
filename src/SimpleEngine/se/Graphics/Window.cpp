@@ -1,5 +1,10 @@
 ﻿#include "Window.h"
 
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "D3D11.lib")
+#pragma comment(lib, "DXGI.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+
 namespace se 
 {
 	namespace 

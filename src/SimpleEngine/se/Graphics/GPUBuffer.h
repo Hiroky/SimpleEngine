@@ -61,7 +61,9 @@ namespace se
 	class VertexBuffer : public GPUResource
 	{
 	private:
+		ID3D11InputLayout* layout_;
 		uint stride_;
+		uint attributes_;
 
 	public:
 		VertexBuffer();
@@ -70,6 +72,7 @@ namespace se
 		void CreateBuffer(const VertexBufferDesc& desc);
 		void DestroyBuffer();
 		uint GetStride() const { return stride_; }
+		uint GetAttributes() const { return attributes_; }
 	};
 
 

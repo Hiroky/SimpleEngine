@@ -31,12 +31,15 @@ namespace se
 #pragma region VertexBuffer
 
 	VertexBuffer::VertexBuffer()
-		: stride_(0)
+		: layout_(nullptr)
+		, stride_(0)
+		, attributes_(0)
 	{
 	}
 
 	VertexBuffer::~VertexBuffer()
 	{
+		COMPTR_RELEASE(layout_);
 	}
 
 	void VertexBuffer::CreateBuffer(const VertexBufferDesc& desc)

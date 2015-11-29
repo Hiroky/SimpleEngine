@@ -2,6 +2,7 @@
 
 #include "se/Common.h"
 #include "se/Graphics/GPUBuffer.h"
+#include "se/Graphics/Material.h"
 
 namespace se
 {
@@ -10,6 +11,7 @@ namespace se
 	private:
 		VertexBuffer vertexBuffer_;
 		IndexBuffer indexBuffer_;
+		Material material_;
 
 	public:
 		MeshResource();

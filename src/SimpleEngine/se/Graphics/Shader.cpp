@@ -94,7 +94,7 @@ namespace se
 	}
 
 
-	void ShaderReflection::Create(void* data, size_t size)
+	void ShaderReflection::Create(const void* data, size_t size)
 	{
 		HRESULT hr = D3DReflect(data, size, IID_ID3D11ShaderReflection, (void**)&reflection_);
 		THROW_IF_FAILED(hr);
@@ -106,20 +106,23 @@ namespace se
 	//
 	uint ShaderReflection::GetVertexLayoutAttribute()
 	{
-#if 0
-		static const char* input_semantics[] = {
+		static const std::array<char*, 7> inputSemantics = {
 			"POSITION",
 			"NORMAL",
 			"TEXCOORD",
-			"WEIGHT",
-			"BONEINDEX",
+			"TANGENT",
+			"BITANGENT",
+			"BLENDWEIGHT",
+			"BLENDINDECES",
 		};
-		static const uint input_attribute[] = {
-			ksShaderManager::KS_SHADER_ATTR_POS,
-			ksShaderManager::KS_SHADER_ATTR_NORMAL,
-			ksShaderManager::KS_SHADER_ATTR_TEXCOORD0,
-			ksShaderManager::KS_SHADER_ATTR_SKIN,
-			ksShaderManager::KS_SHADER_ATTR_SKIN,
+		static const std::array<uint, 7> inputAttribute = {
+			VERTEX_ATTR_POSITION,
+			VERTEX_ATTR_NORMAL,
+			VERTEX_ATTR_TEXCOORD0,
+			VERTEX_ATTR_TANGENT,
+			VERTEX_ATTR_BITANGENT,
+			VERTEX_ATTR_BLENDWEIGHT,
+			VERTEX_ATTR_BLENDINDECES,
 		};
 
 		uint attr = 0;
@@ -128,17 +131,14 @@ namespace se
 		for (uint i = 0; i < shader_desc.InputParameters; i++) {
 			D3D11_SIGNATURE_PARAMETER_DESC param_desc;
 			reflection_->GetInputParameterDesc(i, &param_desc);
-			for (int j = 0; j < KS_ARRAY_SIZE(input_semantics); j++) {
-				if (strcmp(input_semantics[j], param_desc.SemanticName) == 0) {
-					attr |= input_attribute[j];
+			for (uint j = 0; j < inputSemantics.size(); j++) {
+				if (strcmp(inputSemantics[j], param_desc.SemanticName) == 0) {
+					attr |= inputAttribute[j];
 					break;
 				}
 			}
 		}
 		return attr;
-#else
-		return 0;
-#endif
 	}
 
 
@@ -147,8 +147,6 @@ namespace se
 	//
 	bool ShaderReflection::FindConstantBufferByName(const char* name, uint* out_bindIndex)
 	{
-
-
 		D3D11_SHADER_INPUT_BIND_DESC desc;
 		HRESULT hr = reflection_->GetResourceBindingDescByName(name, &desc);
 		if (SUCCEEDED(hr)) {
@@ -204,12 +202,102 @@ namespace se
 		return false;
 	}
 
+	// === VertexLayoutManager ====================================================================================
+	ID3D11InputLayout* VertexLayoutManager::layouts_[64];
+	VertexLayoutManager::AttributeSet VertexLayoutManager::attributeSet_[64];
+	uint VertexLayoutManager::useCount_;
+
+
+	void VertexLayoutManager::Initialize()
+	{
+		memset(layouts_, 0, sizeof(layouts_));
+		memset(attributeSet_, 0, sizeof(attributeSet_));
+		useCount_ = 0;
+	}
+
+	void VertexLayoutManager::Finalize()
+	{
+		for (uint i = 0; i < useCount_; i++) {
+			COMPTR_RELEASE(layouts_[i]);
+		}
+		useCount_ = 0;
+	}
+
+	ID3D11InputLayout * VertexLayoutManager::GetLayout(VertexShader * shader, uint vertexAttr)
+	{
+		uint i;
+		for (i = 0; i < useCount_; i++) {
+			if (vertexAttr == attributeSet_[i].vertexAttr
+				//|| shader->GetVertexAttr() == attributeSet_[i].shaderAttr
+				) {
+				break;
+			}
+		}
+
+		// 見つからなかったら生成
+		if (i == useCount_) {
+			D3D11_INPUT_ELEMENT_DESC desc[16];
+			uint count = 0;
+			uint offset = 0;
+			if (vertexAttr & VERTEX_ATTR_POSITION) {
+				D3D11_INPUT_ELEMENT_DESC t = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_NORMAL) {
+				D3D11_INPUT_ELEMENT_DESC t = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_COLOR) {
+				D3D11_INPUT_ELEMENT_DESC t = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 16;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_TANGENT) {
+				D3D11_INPUT_ELEMENT_DESC t = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_BITANGENT) {
+				D3D11_INPUT_ELEMENT_DESC t = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_BLENDWEIGHT) {
+				D3D11_INPUT_ELEMENT_DESC t = { "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+			if (vertexAttr & VERTEX_ATTR_BLENDINDECES) {
+				D3D11_INPUT_ELEMENT_DESC t = { "BLENDINDECES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+				desc[count] = t;
+				offset += 12;
+				count++;
+			}
+
+			//HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(desc, count, data, size, &layouts_[useCount_]);
+			//THROW_IF_FAILED(hr);
+			useCount_++;
+		}
+
+		return layouts_[i];
+	}
 
 	// === VertexShader ====================================================================================
 
 	VertexShader::VertexShader()
 		: shader_(nullptr)
 		, inputLayout_(nullptr)
+		, blob_(nullptr)
+		, data_(nullptr)
+		, dataSize_(0)
 	{
 	}
 
@@ -217,6 +305,7 @@ namespace se
 	{
 		COMPTR_RELEASE(shader_);
 		COMPTR_RELEASE(inputLayout_);
+		COMPTR_RELEASE(blob_);
 	}
 
 	void VertexShader::CreateInputLayout(const void * data, size_t size)
@@ -224,10 +313,11 @@ namespace se
 		// 仮
 		D3D11_INPUT_ELEMENT_DESC layout[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 		HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(
 			layout,
-			1,
+			2,
 			data,
 			size,
 			&inputLayout_);
@@ -237,6 +327,8 @@ namespace se
 	{
 		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(data, size, nullptr, &shader_);
 		THROW_IF_FAILED(hr);
+		data_ = data;
+		dataSize_ = size;
 		CreateInputLayout(data, size);
 
 		if (reflection) {
@@ -246,30 +338,30 @@ namespace se
 
 	void VertexShader::CompileFromFile(const char* fileName, const char* entryPoint, ShaderReflection* reflection)
 	{
-		ID3DBlob* blob = nullptr;
-		CompileShaderFromFile(fileName, entryPoint, "vs_5_0", &blob);
-		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader_);
+		CompileShaderFromFile(fileName, entryPoint, "vs_5_0", &blob_);
+		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(blob_->GetBufferPointer(), blob_->GetBufferSize(), nullptr, &shader_);
 		THROW_IF_FAILED(hr);
-		CreateInputLayout(blob->GetBufferPointer(), blob->GetBufferSize());
+		data_ = blob_->GetBufferPointer();
+		dataSize_ = blob_->GetBufferSize();
+		CreateInputLayout(data_, dataSize_);
 
 		if (reflection) {
-			reflection->Create(blob->GetBufferPointer(), blob->GetBufferSize());
+			reflection->Create(data_, dataSize_);
 		}
-		COMPTR_RELEASE(blob);
 	}
 
 	void VertexShader::CompileFromString(const char* source, int length, const char* entryPoint, ShaderReflection* reflection)
 	{
-		ID3DBlob* blob = nullptr;
-		CompileShaderFromString(source, length, entryPoint, "vs_5_0", &blob);
-		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader_);
+		CompileShaderFromString(source, length, entryPoint, "vs_5_0", &blob_);
+		HRESULT hr = GraphicsCore::GetDevice()->CreateVertexShader(blob_->GetBufferPointer(), blob_->GetBufferSize(), nullptr, &shader_);
 		THROW_IF_FAILED(hr);
-		CreateInputLayout(blob->GetBufferPointer(), blob->GetBufferSize());
+		data_ = blob_->GetBufferPointer();
+		dataSize_ = blob_->GetBufferSize();
+		CreateInputLayout(data_, dataSize_);
 
 		if (reflection) {
-			reflection->Create(blob->GetBufferPointer(), blob->GetBufferSize());
+			reflection->Create(data_, dataSize_);
 		}
-		COMPTR_RELEASE(blob);
 	}
 
 

@@ -16,13 +16,36 @@ namespace se
 		ShaderReflection();
 		~ShaderReflection();
 
-		void Create(void* data, size_t size);
+		void Create(const void* data, size_t size);
 		uint GetVertexLayoutAttribute();
 		bool FindConstantBufferByName(const char* name, uint* out_bindIndex);
 		bool FindUniformVariableByName(const char* name, uint* out_offset = NULL, uint* size = NULL);
 		bool FindTextureBindByName(const char* name, uint* out_bindIndex);
 	};
 
+	//
+	// 頂点レイアウト管理
+	//
+	class VertexLayoutManager
+	{
+	private:
+		struct AttributeSet
+		{
+			uint vertexAttr;
+			uint shaderAttr;
+		};
+
+	private:
+		static ID3D11InputLayout* layouts_[64];
+		static AttributeSet attributeSet_[64];
+		static uint useCount_;
+
+	public:
+		void Initialize();
+		void Finalize();
+
+		ID3D11InputLayout* GetLayout(VertexShader* shader, uint vertexAttr);
+	};
 
 	//
 	// 頂点シェーダ
@@ -34,6 +57,9 @@ namespace se
 	private:
 		ID3D11VertexShader* shader_;
 		ID3D11InputLayout* inputLayout_;
+		ID3DBlob* blob_;
+		const void* data_;
+		size_t dataSize_;
 
 	private:
 		void CreateInputLayout(const void* data, size_t size);

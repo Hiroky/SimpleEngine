@@ -5,9 +5,12 @@
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
+#include <array>
+#include <algorithm>
 
-
-//å^
+// å^
 typedef unsigned int				uint;
 typedef unsigned short				ushort;
 
+// É}ÉNÉç
+#define arraySize(p)		(sizeof (p) /sizeof p[0])
