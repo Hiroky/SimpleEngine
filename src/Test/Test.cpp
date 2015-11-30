@@ -24,6 +24,7 @@ PSInput main(Vertex v)\
 
 const char* ps_string = "\
 Texture2D texture0 : register(t0);\
+SamplerState sampler0 : register(s0);\
 struct PSInput\
 {\
 	float4 v_position : SV_POSITION;\
@@ -32,7 +33,7 @@ struct PSInput\
 \
 float4 main(PSInput i) : SV_Target\
 {\
-	return float4(1, 1, 1, 1);\
+	return texture0.Sample(sampler0, i.v_texcoord0);\
 }\
 ";
 
@@ -75,7 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	indexBuffer.CreateBuffer(index, sizeof(index), se::INDEX_BUFFER_STRIDE_U32);
 
 	se::Texture texture;
-	//texture.LoadFromFile("test.dds");
+	texture.LoadFromFile("test.dds");
 
 	// ƒƒCƒ“ƒ‹[ƒv
 	MSG msg = { 0 };
@@ -89,6 +90,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			context->SetPixelShader(*shader.GetPS());
 			context->SetVertexBuffer(0, &vertexBuffer);
 			context->SetIndexBuffer(&indexBuffer);
+			context->SetPSResource(0, &texture);
+			context->SetPSSamplerState(0, se::SamplerState::Get(se::SamplerState::LinearClamp));
 			context->DrawIndexed(0, 3);
 
 			se::GraphicsCore::Present(1, 0);
