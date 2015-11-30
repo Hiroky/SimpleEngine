@@ -38,6 +38,9 @@
     <ClInclude Include="se\Math\Vector.h">
       <Filter>src\Math</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsStates.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -67,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="se\Math\Vector.cpp">
       <Filter>src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsStates.cpp">
+      <Filter>src\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

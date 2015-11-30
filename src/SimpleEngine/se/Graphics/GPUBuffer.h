@@ -152,7 +152,7 @@ namespace se
 	//
 	// テクスチャリソース
 	//
-	class Texture : PixelBuffer
+	class Texture : public PixelBuffer
 	{
 	public:
 		Texture();

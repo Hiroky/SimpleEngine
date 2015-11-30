@@ -9,6 +9,7 @@ namespace se
 	class GPUResource;
 	class VertexBuffer;
 	class IndexBuffer;
+	class SamplerState;
 
 
 	//
@@ -33,6 +34,7 @@ namespace se
 
 		void SetVSResource(uint slot, const GPUResource* resource);
 		void SetPSResource(uint slot, const GPUResource* resource);
+		void SetPSSamplerState(uint slot, const SamplerState& sampler);
 
 		void DrawIndexed(uint indexStart, uint indexCount);
 	};

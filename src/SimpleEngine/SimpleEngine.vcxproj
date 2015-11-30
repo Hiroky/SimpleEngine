@@ -176,6 +176,7 @@
   <ItemGroup>
     <ClInclude Include="se\engine.h" />
     <ClInclude Include="se\Graphics\DDSTextureLoader.h" />
+    <ClInclude Include="se\Graphics\GraphicsStates.h" />
     <ClInclude Include="se\Graphics\MeshResource.h" />
     <ClInclude Include="se\Graphics\GPUBuffer.h" />
     <ClInclude Include="se\Graphics\Graphics.h" />
@@ -190,6 +191,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp" />
+    <ClCompile Include="se\Graphics\GraphicsStates.cpp" />
     <ClCompile Include="se\Graphics\MeshResource.cpp" />
     <ClCompile Include="se\Graphics\GPUBuffer.cpp" />
     <ClCompile Include="se\Graphics\GraphicsContext.cpp" />

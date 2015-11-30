@@ -1,5 +1,6 @@
 ﻿#include "se/Graphics/GraphicsCore.h"
 #include "se/Graphics/Window.h"
+#include "se/Graphics/GraphicsStates.h"
 
 namespace se
 {
@@ -126,7 +127,11 @@ namespace se
 		deviceContext->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+		// コンテキスト
 		immediateContext_.Initialize(deviceContext);
+
+		// ステート
+		SamplerState::Initialize();
 
 		// 仮
 		D3D11_VIEWPORT vp;

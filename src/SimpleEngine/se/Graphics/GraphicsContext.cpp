@@ -68,6 +68,11 @@ namespace se
 		deviceContext_->PSSetShaderResources(slot, 1, resources);
 	}
 
+	void GraphicsContext::SetPSSamplerState(uint slot, const SamplerState& sampler)
+	{
+		deviceContext_->PSSetSamplers(slot, 1, &sampler.state_);
+	}
+
 	void GraphicsContext::DrawIndexed(uint indexStart, uint indexCount)
 	{
 		deviceContext_->DrawIndexed(indexCount, indexStart, 0);
