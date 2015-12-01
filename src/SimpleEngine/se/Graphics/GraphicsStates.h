@@ -1,9 +1,12 @@
 ﻿#pragma once 
 
 #include "se/Common.h"
+#include "se/Graphics/GraphicsCommon.h"
+#include "se/Graphics/GraphicsContext.h"
 
 namespace se
 {
+
 	class SamplerState
 	{
 		friend GraphicsContext;

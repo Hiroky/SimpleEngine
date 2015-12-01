@@ -1,5 +1,6 @@
 ﻿#include "se/Graphics/GraphicsCore.h"
 #include "se/Graphics/Window.h"
+#include "se/Graphics/Shader.h"
 #include "se/Graphics/GraphicsStates.h"
 
 namespace se
@@ -8,11 +9,9 @@ namespace se
 	D3D_FEATURE_LEVEL		GraphicsCore::featureLevel_;
 	ID3D11Device*			GraphicsCore::device_;
 	IDXGISwapChain*			GraphicsCore::swapChain_;
-	ID3D11RenderTargetView* GraphicsCore::renderTargetView_;
-	ID3D11Texture2D*        GraphicsCore::depthStencil_;
-	ID3D11DepthStencilView* GraphicsCore::depthStencilView_;
 	GraphicsContext			GraphicsCore::immediateContext_;
-
+	ColorBuffer				GraphicsCore::displayBuffer_;
+	DepthStencilBuffer		GraphicsCore::displayDepthBuffer_;
 
 	void GraphicsCore::Initialize()
 	{
@@ -83,48 +82,25 @@ namespace se
 				break;
 			}
 		}
-		THROW_IF_FAILED(hr)
+		THROW_IF_FAILED(hr);
 
 		// バックバッファ取得
 		ID3D11Texture2D* pBackBuffer = NULL;
 		hr = swapChain_->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pBackBuffer);
-		THROW_IF_FAILED(hr)
+		THROW_IF_FAILED(hr);
 
 		// レンダーターゲットビューを生成
-		hr = device_->CreateRenderTargetView(pBackBuffer, NULL, &renderTargetView_);
+		ID3D11RenderTargetView* renderTargetView;
+		hr = device_->CreateRenderTargetView(pBackBuffer, NULL, &renderTargetView);
 		THROW_IF_FAILED(hr)
 		pBackBuffer->Release();
 		pBackBuffer = NULL;
-
+		displayBuffer_.InitializeDisplayBuffer(renderTargetView);
 
 		// デプスステンシルテクスチャ生成
-		D3D11_TEXTURE2D_DESC descDepth;
-		ZeroMemory(&descDepth, sizeof(descDepth));
-		descDepth.Width = width;
-		descDepth.Height = height;
-		descDepth.MipLevels = 1;
-		descDepth.ArraySize = 1;
-		descDepth.Format = DXGI_FORMAT_R24G8_TYPELESS;
-		descDepth.SampleDesc.Count = 1;
-		descDepth.SampleDesc.Quality = 0;
-		descDepth.Usage = D3D11_USAGE_DEFAULT;
-		descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		descDepth.CPUAccessFlags = 0;
-		descDepth.MiscFlags = 0;
-		hr = device_->CreateTexture2D(&descDepth, NULL, &depthStencil_);
-		THROW_IF_FAILED(hr)
-
-		// デプスステンシルビュー
-		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
-		ZeroMemory(&descDSV, sizeof(descDSV));
-		descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		descDSV.Texture2D.MipSlice = 0;
-		hr = device_->CreateDepthStencilView(depthStencil_, &descDSV, &depthStencilView_);
-		THROW_IF_FAILED(hr)
+		displayDepthBuffer_.Initialize(width, height);
 
 		//設定
-		deviceContext->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
 		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// コンテキスト
@@ -165,9 +141,6 @@ namespace se
 		VertexLayoutManager::Finalize();
 
 		immediateContext_.Finalize();
-		COMPTR_RELEASE(depthStencilView_);
-		COMPTR_RELEASE(depthStencil_);
-		COMPTR_RELEASE(renderTargetView_);
 		COMPTR_RELEASE(swapChain_);
 		COMPTR_RELEASE(device_);
 	}
@@ -176,18 +149,6 @@ namespace se
 	void GraphicsCore::Present(uint syncInterval, uint flags)
 	{
 		swapChain_->Present(syncInterval, flags);
-	}
-
-	void GraphicsCore::SetDefaultRenderTarget()
-	{
-		immediateContext_.GetDeviceContext()->OMSetRenderTargets(1, &renderTargetView_, depthStencilView_);
-	}
-
-	void GraphicsCore::ClearRenderTarget()
-	{
-		float color[4] = { 0.3f, 0.4f, 0.9f, 1.0f };
-		immediateContext_.GetDeviceContext()->ClearRenderTargetView(renderTargetView_, color);
-		immediateContext_.GetDeviceContext()->ClearDepthStencilView(depthStencilView_, D3D11_CLEAR_DEPTH, 1, 0);
 	}
 
 }

@@ -1,6 +1,7 @@
 ﻿#pragma once 
 
 #include "se/Common.h"
+#include "se/Math/Vector.h"
 
 namespace se
 {
@@ -9,6 +10,8 @@ namespace se
 	class GPUResource;
 	class VertexBuffer;
 	class IndexBuffer;
+	class ColorBuffer;
+	class DepthStencilBuffer;
 	class SamplerState;
 
 
@@ -27,11 +30,18 @@ namespace se
 		void Finalize();
 		ID3D11DeviceContext* GetDeviceContext() { return deviceContext_; }
 
+		// RenderTarget
+		void SetRenderTarget(const ColorBuffer* colorBuffers, uint count, const DepthStencilBuffer* depthStencil);
+		void ClearRenderTarget(const ColorBuffer& target, const float4& color);
+		void ClearDepthStencil(const DepthStencilBuffer& target, float depth = 1.0f);
+
+		// Shader
 		void SetVertexShader(const VertexShader& shader);
 		void SetPixelShader(const PixelShader& shader);
+
+		// Resource binding
 		void SetVertexBuffer(int slot, const VertexBuffer* vb);
 		void SetIndexBuffer(const IndexBuffer* ib);
-
 		void SetVSResource(uint slot, const GPUResource* resource);
 		void SetPSResource(uint slot, const GPUResource* resource);
 		void SetPSSamplerState(uint slot, const SamplerState& sampler);

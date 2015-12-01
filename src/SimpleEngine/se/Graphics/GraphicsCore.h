@@ -1,8 +1,8 @@
 ﻿#pragma once 
 
-#include <windows.h>
-#include <d3d11.h>
+#include "se/Graphics/GraphicsCommon.h"
 #include "se/Graphics/GraphicsContext.h"
+#include "se/Graphics/GPUBuffer.h"
 
 namespace se
 {
@@ -13,25 +13,21 @@ namespace se
 		static D3D_FEATURE_LEVEL		featureLevel_;
 		static ID3D11Device*			device_;
 		static IDXGISwapChain*			swapChain_;
-		static ID3D11RenderTargetView*	renderTargetView_;
-		static ID3D11Texture2D*			depthStencil_;
-		static ID3D11DepthStencilView*	depthStencilView_;
 
 		static GraphicsContext			immediateContext_;
+		static ColorBuffer				displayBuffer_;
+		static DepthStencilBuffer		displayDepthBuffer_;
 
 	public:
 		static void Initialize();
 		static void Finalize();
-		static void Present(uint syncInterval, uint flags);
-		static void SetDefaultRenderTarget();
-
-		static GraphicsContext* GetImmediateContext() { return &immediateContext_; }
 
 		static ID3D11Device* GetDevice() { return device_; }
+		static GraphicsContext* GetImmediateContext() { return &immediateContext_; }
 
-		// 仮
-		static void ClearRenderTarget();
-		static ID3D11RenderTargetView* GetRenderTarget() { return renderTargetView_; }
-		static ID3D11DepthStencilView* GetDepthStencilView() { return depthStencilView_; }
+		static void Present(uint syncInterval, uint flags);
+
+		static const ColorBuffer& GetDisplayColorBuffer() { return displayBuffer_; }
+		static const DepthStencilBuffer& GetDisplayDepthStencilBuffer() { return displayDepthBuffer_; }
 	};
 }

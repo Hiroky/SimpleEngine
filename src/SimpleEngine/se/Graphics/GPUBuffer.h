@@ -1,6 +1,8 @@
 ﻿#pragma once 
 
 #include "se/Common.h"
+#include "se/Graphics/GraphicsCommon.h"
+#include "se/Graphics/GraphicsContext.h"
 
 namespace se
 {
@@ -123,11 +125,23 @@ namespace se
 	//
 	class ColorBuffer : public PixelBuffer
 	{
+		friend class GraphicsCore;
+
 	private:
 		ID3D11RenderTargetView** rtvs_;
+		uint viewCount_;
+
+	private:
+		void InitializeDisplayBuffer(ID3D11RenderTargetView* renderTarget);
+
 	public:
 		ColorBuffer();
 		virtual ~ColorBuffer();
+
+		// TODO:各種初期化対応
+		//void Initialize2D();
+		//void Initialize3D();
+		//void InitializeCube();
 
 		ID3D11RenderTargetView* GetRTV(uint index = 0) const { return rtvs_[index]; }
 	};
@@ -144,6 +158,8 @@ namespace se
 	public:
 		DepthStencilBuffer();
 		virtual ~DepthStencilBuffer();
+
+		void Initialize(uint width, uint height); // TODO:フォーマット指定
 
 		ID3D11DepthStencilView* GetDSV() const { return dsv_; }
 	};

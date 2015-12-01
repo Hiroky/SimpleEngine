@@ -1,5 +1,7 @@
-﻿#include "se/Graphics/GraphicsContext.h"
-#include "se/Graphics/GPUBuffer.h"
+﻿#include "se/Graphics/GPUBuffer.h"
+#include "se/Graphics/GraphicsCore.h"
+#include "se/Graphics/GraphicsContext.h"
+#include "se/Graphics/Shader.h"
 #include "se/Graphics/DDSTextureLoader.h"
 
 
@@ -176,10 +178,27 @@ namespace se
 #pragma region ColorBuffer
 
 	ColorBuffer::ColorBuffer()
+		: rtvs_(nullptr)
+		, viewCount_(0)
 	{
 	}
+
 	ColorBuffer::~ColorBuffer()
 	{
+		if (rtvs_) {
+			for (uint i = 0; i < viewCount_; i++) {
+				COMPTR_RELEASE(rtvs_[i]);
+			}
+			delete [] rtvs_;
+			rtvs_ = nullptr;
+		}
+	}
+
+	void ColorBuffer::InitializeDisplayBuffer(ID3D11RenderTargetView* renderTarget)
+	{
+		rtvs_ = new ID3D11RenderTargetView*[1];
+		rtvs_[0] = renderTarget;
+		viewCount_ = 1;
 	}
 
 #pragma endregion
@@ -192,6 +211,40 @@ namespace se
 
 	DepthStencilBuffer::~DepthStencilBuffer()
 	{
+		COMPTR_RELEASE(dsv_);
+	}
+
+	void DepthStencilBuffer::Initialize(uint width, uint height)
+	{
+		auto* device = GraphicsCore::GetDevice();
+
+		// デプスステンシルテクスチャ
+		D3D11_TEXTURE2D_DESC descDepth;
+		ZeroMemory(&descDepth, sizeof(descDepth));
+		descDepth.Width = width;
+		descDepth.Height = height;
+		descDepth.MipLevels = 1;
+		descDepth.ArraySize = 1;
+		descDepth.Format = DXGI_FORMAT_R24G8_TYPELESS;
+		descDepth.SampleDesc.Count = 1;
+		descDepth.SampleDesc.Quality = 0;
+		descDepth.Usage = D3D11_USAGE_DEFAULT;
+		descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		descDepth.CPUAccessFlags = 0;
+		descDepth.MiscFlags = 0;
+		ID3D11Texture2D* texture2d;
+		auto hr = device->CreateTexture2D(&descDepth, NULL, &texture2d);
+		THROW_IF_FAILED(hr);
+		resource_ = texture2d;
+
+		// デプスステンシルビュー
+		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+		ZeroMemory(&descDSV, sizeof(descDSV));
+		descDSV.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+		descDSV.Texture2D.MipSlice = 0;
+		hr = device->CreateDepthStencilView(texture2d, &descDSV, &dsv_);
+		THROW_IF_FAILED(hr);
 	}
 
 #pragma endregion
@@ -201,6 +254,7 @@ namespace se
 	Texture::Texture()
 	{
 	}
+
 	Texture::~Texture()
 	{
 	}

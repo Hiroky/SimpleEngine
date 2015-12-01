@@ -83,8 +83,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	while (se::Window::IsAlive()) {
 		if(!se::Window::IsMinimized()) {
 			auto* context = se::GraphicsCore::GetImmediateContext();
+			auto& colorBuffer = se::GraphicsCore::GetDisplayColorBuffer();
+			auto& depthBuffer = se::GraphicsCore::GetDisplayDepthStencilBuffer();
 
-			se::GraphicsCore::ClearRenderTarget();
+			context->SetRenderTarget(&colorBuffer, 1, &depthBuffer);
+			context->ClearRenderTarget(colorBuffer, se::float4(0.3f, 0.4f, 0.9f, 1.0f));
+			context->ClearDepthStencil(depthBuffer);
 
 			context->SetVertexShader(*shader.GetVS());
 			context->SetPixelShader(*shader.GetPS());

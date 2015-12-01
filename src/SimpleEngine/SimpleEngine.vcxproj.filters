@@ -41,6 +41,9 @@
     <ClInclude Include="se\Graphics\GraphicsStates.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsCommon.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">

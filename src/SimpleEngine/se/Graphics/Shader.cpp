@@ -1,6 +1,5 @@
-﻿#include "se/Graphics/GraphicsContext.h"
-#include "Shader.h"
-
+﻿#include "se/Graphics/Shader.h"
+#include "se/Graphics/GraphicsCore.h"
 
 namespace se
 {
@@ -223,7 +222,7 @@ namespace se
 		useCount_ = 0;
 	}
 
-	ID3D11InputLayout * VertexLayoutManager::GetLayout(const VertexShader& shader, uint vertexAttr)
+	ID3D11InputLayout* VertexLayoutManager::GetLayout(const VertexShader& shader, uint vertexAttr)
 	{
 		// 既存データから検索
 		uint i;
