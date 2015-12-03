@@ -60,6 +60,16 @@ namespace se
 		deviceContext_->PSSetShader(shader.Get(), nullptr, 0);
 	}
 
+	void GraphicsContext::SetDepthStencilState(const DepthStencilState& depthStencil)
+	{
+		deviceContext_->OMSetDepthStencilState(depthStencil.state_, 0);
+	}
+
+	void GraphicsContext::SetRasterizerState(const RasterizerState& raster)
+	{
+		deviceContext_->RSSetState(raster.state_);
+	}
+
 	void GraphicsContext::SetVertexBuffer(int slot, const VertexBuffer* vb)
 	{
 		if (!vb) {

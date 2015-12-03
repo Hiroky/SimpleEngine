@@ -108,6 +108,10 @@ namespace se
 
 		// ステート
 		SamplerState::Initialize();
+		DepthStencilState::Initialize();
+		RasterizerState::Initialize();
+		immediateContext_.SetDepthStencilState(DepthStencilState::Get(DepthStencilState::Disable));
+		immediateContext_.SetRasterizerState(RasterizerState::Get(RasterizerState::BackFaceCull));
 
 		// 仮
 		D3D11_VIEWPORT vp;
@@ -118,18 +122,6 @@ namespace se
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
 		deviceContext->RSSetViewports(1, &vp);
-
-		D3D11_RASTERIZER_DESC rsDesc;
-		ZeroMemory(&rsDesc, sizeof(D3D11_RASTERIZER_DESC));
-		rsDesc.CullMode = D3D11_CULL_NONE;
-		rsDesc.FrontCounterClockwise = TRUE;
-		rsDesc.FillMode = D3D11_FILL_SOLID;
-		rsDesc.DepthClipEnable = TRUE;
-		ID3D11RasterizerState* rs;
-		hr = device_->CreateRasterizerState(&rsDesc, &rs);
-		THROW_IF_FAILED(hr);
-		deviceContext->RSSetState(rs);
-		COMPTR_RELEASE(rs);
 
 		// TODO:シェーダ系のマネージャができたらそちらに移す
 		VertexLayoutManager::Initialize();
