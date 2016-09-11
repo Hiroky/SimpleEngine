@@ -1,4 +1,4 @@
-#include "se/Graphics/Window.h"
+ï»¿#include "se/Graphics/Window.h"
 
 
 struct Vertex
@@ -14,11 +14,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	se::ShaderManager::Get().Initialize("shaders");
 	se::Window::Show();
 
-	// •`‰æ—pƒVƒF[ƒ_
+	// æç”»ç”¨ã‚·ã‚§ãƒ¼ãƒ€
 	auto* quadShader = se::ShaderManager::Get().Find("ScreenQuad");
 	Assert(quadShader);
 
-	// ’¸“_ƒf[ƒ^
+	// é ‚ç‚¹ãƒ‡ãƒ¼ã‚¿
 	Vertex vertex[] = {
 		{ se::float3(-1.0f,  1.0f, 0), se::float2(0.0f, 0.0f) },
 		{ se::float3(-1.0f, -1.0f, 0), se::float2(0.0f, 1.0f) },
@@ -32,11 +32,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	indexBuffer.Create(index, sizeof(index), se::INDEX_BUFFER_STRIDE_U32);
 	const auto* layout = se::VertexLayoutManager::Get().FindLayout(*quadShader->GetVS(), vertexBuffer.GetAttributes());
 
-	// ƒeƒNƒXƒ`ƒƒ
+	// ãƒ†ã‚¯ã‚¹ãƒãƒ£
 	se::Texture texture;
 	texture.LoadFromFile("texture/test.dds");
 
-	// ƒƒCƒ“ƒ‹[ƒv
+	// ãƒ¡ã‚¤ãƒ³ãƒ«ãƒ¼ãƒ—
 	MSG msg = { 0 };
 	while (se::Window::IsAlive()) {
 		if(!se::Window::IsMinimized()) {

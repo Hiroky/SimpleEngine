@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <windows.h>
 #include <d3d11.h>
@@ -15,7 +15,7 @@ namespace se
 {
 
 	/**
-	 * ’¸“_ƒAƒgƒŠƒrƒ…[ƒg
+	 * é ‚ç‚¹ã‚¢ãƒˆãƒªãƒ“ãƒ¥ãƒ¼ãƒˆ
 	 */
 	enum VertexAttribute
 	{
@@ -44,7 +44,7 @@ namespace se
 	typedef uint32_t VertexAttributeFlags;
 
 	/**
-	 * ƒvƒŠƒ~ƒeƒBƒuƒ^ƒCƒv
+	 * ãƒ—ãƒªãƒŸãƒ†ã‚£ãƒ–ã‚¿ã‚¤ãƒ—
 	 */
 	enum PrimitiveType
 	{

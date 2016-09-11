@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "se/Common.h"
 #include "Atomic.h"
@@ -9,7 +9,7 @@ namespace se {
 	static const uint32_t WAIT_INFINITE = INFINITE;
 
 	/**
-	 * ƒNƒŠƒeƒBƒJƒ‹ƒZƒNƒVƒ‡ƒ“
+	 * ã‚¯ãƒªãƒ†ã‚£ã‚«ãƒ«ã‚»ã‚¯ã‚·ãƒ§ãƒ³
 	 */
 	class CriticalSection
 	{
@@ -20,7 +20,7 @@ namespace se {
 		CriticalSection()
 		{
 			InitializeCriticalSection(&criticalSection_);
-			// ƒXƒsƒ“ƒJƒEƒ“ƒgİ’è(Ú×‚Íhttps://msdn.microsoft.com/ja-jp/library/cc429324.aspx)
+			// ã‚¹ãƒ”ãƒ³ã‚«ã‚¦ãƒ³ãƒˆè¨­å®š(è©³ç´°ã¯https://msdn.microsoft.com/ja-jp/library/cc429324.aspx)
 			SetCriticalSectionSpinCount(&criticalSection_, 4000);
 		}
 
@@ -32,7 +32,7 @@ namespace se {
 
 		void Lock()
 		{
-			// ‚·‚Å‚ÉƒXƒŒƒbƒh‚ªƒZƒNƒVƒ‡ƒ“•Û‚µ‚Ä‚¢‚éê‡–³‘Ê‚È‚Ì‚Åˆê‰ñTry‚·‚é
+			// ã™ã§ã«ã‚¹ãƒ¬ãƒƒãƒ‰ãŒã‚»ã‚¯ã‚·ãƒ§ãƒ³ä¿æŒã—ã¦ã„ã‚‹å ´åˆç„¡é§„ãªã®ã§ä¸€å›Tryã™ã‚‹
 			if (TryEnterCriticalSection(&criticalSection_) == 0) {
 				EnterCriticalSection(&criticalSection_);
 			}
@@ -46,7 +46,7 @@ namespace se {
 
 
 	/**
-	 * ƒXƒsƒ“ƒƒbƒN
+	 * ã‚¹ãƒ”ãƒ³ãƒ­ãƒƒã‚¯
 	 */
 	class SpinLock
 	{
@@ -77,7 +77,7 @@ namespace se {
 
 
 	/**
-	 * ƒXƒR[ƒvƒƒbƒN
+	 * ã‚¹ã‚³ãƒ¼ãƒ—ãƒ­ãƒƒã‚¯
 	 */
 	template<class T>
 	class ScopedLock
@@ -103,7 +103,7 @@ namespace se {
 
 
 	/**
-	 * ƒCƒxƒ“ƒg
+	 * ã‚¤ãƒ™ãƒ³ãƒˆ
 	 */
 	class Event
 	{
@@ -134,7 +134,7 @@ namespace se {
 			manualReset_ = isManualReset;
 		}
 
-		// ƒCƒxƒ“ƒg”­‰Î
+		// ã‚¤ãƒ™ãƒ³ãƒˆç™ºç«
 		void Trigger()
 		{
 			SetEvent(handle_);
@@ -145,7 +145,7 @@ namespace se {
 			ResetEvent(handle_);
 		}
 
-		// ³í‚ÉƒVƒOƒiƒ‹ƒCƒxƒ“ƒg‚Å”²‚¯‚½‚©‚ğ•Ô‚·
+		// æ­£å¸¸ã«ã‚·ã‚°ãƒŠãƒ«ã‚¤ãƒ™ãƒ³ãƒˆã§æŠœã‘ãŸã‹ã‚’è¿”ã™
 		bool Wait(uint32_t waitTime = WAIT_INFINITE)
 		{
 			return WaitForSingleObject(handle_, waitTime) == WAIT_OBJECT_0;
@@ -154,7 +154,7 @@ namespace se {
 
 
 	/**
-	 * ƒXƒR[ƒv‚É‚æ‚éƒCƒxƒ“ƒg‘Ò‚¿
+	 * ã‚¹ã‚³ãƒ¼ãƒ—ã«ã‚ˆã‚‹ã‚¤ãƒ™ãƒ³ãƒˆå¾…ã¡
 	 */
 	class ScopedEvent
 	{
@@ -179,7 +179,7 @@ namespace se {
 
 
 	/**
-	 * ƒXƒŒƒbƒhã‚Åˆ—‚ğ‘–‚ç‚¹‚éƒIƒuƒWƒFƒNƒg
+	 * ã‚¹ãƒ¬ãƒƒãƒ‰ä¸Šã§å‡¦ç†ã‚’èµ°ã‚‰ã›ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 	 */
 	class ThreadRunnable
 	{
@@ -195,7 +195,7 @@ namespace se {
 
 
 	/**
-	 * ƒXƒŒƒbƒh
+	 * ã‚¹ãƒ¬ãƒƒãƒ‰
 	 */
 	class Thread
 	{
@@ -205,7 +205,7 @@ namespace se {
 		ThreadRunnable* runner_;
 
 	private:
-		// ƒXƒŒƒbƒh‚ÌƒGƒ“ƒgƒŠƒ|ƒCƒ“ƒg
+		// ã‚¹ãƒ¬ãƒƒãƒ‰ã®ã‚¨ãƒ³ãƒˆãƒªãƒã‚¤ãƒ³ãƒˆ
 		static DWORD __stdcall ThreadProc(void* data)
 		{
 			return reinterpret_cast<Thread*>(data)->Run();
@@ -250,17 +250,17 @@ namespace se {
 
 		bool Kill(bool wait = false)
 		{
-			// Às’†‚Ìƒ^ƒXƒN‚ğ~‚ß‚é
+			// å®Ÿè¡Œä¸­ã®ã‚¿ã‚¹ã‚¯ã‚’æ­¢ã‚ã‚‹
 			if (runner_) {
 				runner_->Stop();
 			}
 
-			// I—¹‚ğ‘Ò‚Â
+			// çµ‚äº†ã‚’å¾…ã¤
 			if (wait) {
 				Wait();
 			}
 
-			// ƒNƒ[ƒY
+			// ã‚¯ãƒ­ãƒ¼ã‚º
 			CloseHandle(handle_);
 			handle_ = nullptr;
 			return true;

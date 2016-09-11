@@ -1,0 +1,7 @@
+.vs
+ipch
+x64
+Test/x64
+SimpleEngine/x64
+SimpleEngine.VC.db
+SimpleEngine.VC.VC.opendb

@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
 #include "se/Common.h"
 
 namespace se {
 
 	/**
-	 * ƒAƒgƒ~ƒbƒN‘€ì
+	 * ã‚¢ãƒˆãƒŸãƒƒã‚¯æ“ä½œ
 	 */
 	class Atomic
 	{

@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 
 
-// ƒvƒ‰ƒbƒgƒtƒH[ƒ€ƒwƒbƒ_
+// ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ãƒ˜ãƒƒãƒ€
 #include <windows.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
@@ -10,12 +10,12 @@
 #include <array>
 #include <algorithm>
 
-// ƒ}ƒNƒ
+// ãƒã‚¯ãƒ­
 #define arraySize(p)		(sizeof (p) /sizeof p[0])
 
 #ifdef _DEBUG
 
-	// ƒfƒoƒbƒOo—Í—p
+	// ãƒ‡ãƒãƒƒã‚°å‡ºåŠ›ç”¨
 	inline void DebugPrintf(const char *fmt, ...)
 	{
 		char buf[1024];
