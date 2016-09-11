@@ -47,6 +47,15 @@
     <ClInclude Include="thirdparty\picojson\picojson.h">
       <Filter>thirdparty\picojson</Filter>
     </ClInclude>
+    <ClInclude Include="se\async\Threading.h">
+      <Filter>src\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="se\async\Atomic.h">
+      <Filter>src\Async</Filter>
+    </ClInclude>
+    <ClInclude Include="se\async\Async.h">
+      <Filter>src\Async</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -93,6 +102,9 @@
     </Filter>
     <Filter Include="thirdparty\picojson">
       <UniqueIdentifier>{41e340f1-2639-4969-bc4d-aca5ec94e7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Async">
+      <UniqueIdentifier>{ae15cbad-616c-4506-8a2b-f7fdc6813c5a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

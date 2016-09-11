@@ -180,6 +180,9 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="se\async\Async.h" />
+    <ClInclude Include="se\async\Atomic.h" />
+    <ClInclude Include="se\async\Threading.h" />
     <ClInclude Include="se\engine.h" />
     <ClInclude Include="se\Graphics\DDSTextureLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
