@@ -1,5 +1,7 @@
 ﻿#include "se/Graphics/Shader.h"
 #include "se/Graphics/GraphicsCore.h"
+#include "thirdparty/picojson/picojson.h"
+#include <fstream>
 
 namespace se
 {
@@ -103,34 +105,30 @@ namespace se
 	//
 	//	頂点アトリビュートを取得する
 	//
-	uint ShaderReflection::GetVertexLayoutAttribute()
+	uint32_t ShaderReflection::GetVertexLayoutAttribute()
 	{
-		static const std::array<char*, 7> inputSemantics = {
+		static const char* inputSemantics[] = {
 			"POSITION",
 			"NORMAL",
 			"TEXCOORD",
 			"TANGENT",
 			"BITANGENT",
-			"BLENDWEIGHT",
-			"BLENDINDECES",
 		};
-		static const std::array<uint, 7> inputAttribute = {
-			VERTEX_ATTR_POSITION,
-			VERTEX_ATTR_NORMAL,
-			VERTEX_ATTR_TEXCOORD0,
-			VERTEX_ATTR_TANGENT,
-			VERTEX_ATTR_BITANGENT,
-			VERTEX_ATTR_BLENDWEIGHT,
-			VERTEX_ATTR_BLENDINDECES,
+		static const VertexAttributeFlags inputAttribute[] = {
+			VERTEX_ATTR_FLAG_POSITION,
+			VERTEX_ATTR_FLAG_NORMAL,
+			VERTEX_ATTR_FLAG_TEXCOORD0,
+			VERTEX_ATTR_FLAG_TANGENT,
+			VERTEX_ATTR_FLAG_BITANGENT,
 		};
 
-		uint attr = 0;
+		uint32_t attr = 0;
 		D3D11_SHADER_DESC shader_desc;
 		reflection_->GetDesc(&shader_desc);
-		for (uint i = 0; i < shader_desc.InputParameters; i++) {
+		for (uint32_t i = 0; i < shader_desc.InputParameters; i++) {
 			D3D11_SIGNATURE_PARAMETER_DESC param_desc;
 			reflection_->GetInputParameterDesc(i, &param_desc);
-			for (uint j = 0; j < inputSemantics.size(); j++) {
+			for (uint32_t j = 0; j < arraySize(inputSemantics); j++) {
 				if (strcmp(inputSemantics[j], param_desc.SemanticName) == 0) {
 					attr |= inputAttribute[j];
 					break;
@@ -144,7 +142,7 @@ namespace se
 	//	
 	//	名前からコンスタントバッファを検索する
 	//
-	bool ShaderReflection::FindConstantBufferByName(const char* name, uint* out_bindIndex)
+	bool ShaderReflection::FindConstantBufferByName(const char* name, uint32_t* out_bindIndex)
 	{
 		D3D11_SHADER_INPUT_BIND_DESC desc;
 		HRESULT hr = reflection_->GetResourceBindingDescByName(name, &desc);
@@ -160,7 +158,7 @@ namespace se
 
 	//	
 	//
-	bool ShaderReflection::FindTextureBindByName(const char* name, uint* out_bindIndex)
+	bool ShaderReflection::FindTextureBindByName(const char* name, uint32_t* out_bindIndex)
 	{
 		D3D11_SHADER_INPUT_BIND_DESC desc;
 		HRESULT hr = reflection_->GetResourceBindingDescByName(name, &desc);
@@ -177,7 +175,7 @@ namespace se
 	//
 	//	名前からシェーダ内で使用されているコンスタントバッファ内の変数を検索する
 	//
-	bool ShaderReflection::FindUniformVariableByName(const char* name, uint* out_offset, uint* out_size)
+	bool ShaderReflection::FindUniformVariableByName(const char* name, uint32_t* out_offset, uint32_t* out_size)
 	{
 		ID3D11ShaderReflectionVariable* var = reflection_->GetVariableByName(name);
 		D3D11_SHADER_VARIABLE_DESC desc;
@@ -202,118 +200,96 @@ namespace se
 	}
 
 	// === VertexLayoutManager ====================================================================================
-	ID3D11InputLayout* VertexLayoutManager::layouts_[64];
-	VertexLayoutManager::AttributeSet VertexLayoutManager::attributeSet_[64];
-	uint VertexLayoutManager::useCount_;
-
 
 	void VertexLayoutManager::Initialize()
 	{
-		memset(layouts_, 0, sizeof(layouts_));
-		memset(attributeSet_, 0, sizeof(attributeSet_));
-		useCount_ = 0;
 	}
 
 	void VertexLayoutManager::Finalize()
 	{
-		for (uint i = 0; i < useCount_; i++) {
-			COMPTR_RELEASE(layouts_[i]);
-		}
-		useCount_ = 0;
+		layoutMap_.clear();
 	}
 
-	ID3D11InputLayout* VertexLayoutManager::GetLayout(const VertexShader& shader, uint vertexAttr)
+	const VertexInputLayout* VertexLayoutManager::FindLayout(const VertexShader& shader, uint32_t vertexAttr)
 	{
 		// 既存データから検索
-		uint i;
-		for (i = 0; i < useCount_; i++) {
-			if (vertexAttr == attributeSet_[i].vertexAttr
-				|| shader.GetVertexAttribute() == attributeSet_[i].shaderAttr
-				) {
-				break;
-			}
+		Assert(sizeof(size_t) == 8);	// 64bit only
+		size_t hash = (vertexAttr | (static_cast<size_t>(shader.GetVertexAttribute()) << 32));
+		auto iter = layoutMap_.find(hash);
+		if (iter != layoutMap_.end()) {
+			Assert((iter->second.shaderAttr = shader.GetVertexAttribute()) && iter->second.vertexAttr == vertexAttr);
+			return &iter->second;
 		}
 
 		// 見つからなかったら生成
-		if (i == useCount_) {
-			D3D11_INPUT_ELEMENT_DESC desc[16];
-			uint count = 0;
-			uint offset = 0;
-			if (vertexAttr & VERTEX_ATTR_POSITION) {
-				D3D11_INPUT_ELEMENT_DESC t = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_NORMAL) {
-				D3D11_INPUT_ELEMENT_DESC t = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_COLOR) {
-				D3D11_INPUT_ELEMENT_DESC t = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 16;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_TEXCOORD0) {
-				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 8;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_TEXCOORD1) {
-				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 8;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_TEXCOORD2) {
-				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 8;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_TEXCOORD3) {
-				D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 8;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_TANGENT) {
-				D3D11_INPUT_ELEMENT_DESC t = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_BITANGENT) {
-				D3D11_INPUT_ELEMENT_DESC t = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_BLENDWEIGHT) {
-				D3D11_INPUT_ELEMENT_DESC t = { "BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
-			if (vertexAttr & VERTEX_ATTR_BLENDINDECES) {
-				D3D11_INPUT_ELEMENT_DESC t = { "BLENDINDECES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
-				desc[count] = t;
-				offset += 12;
-				count++;
-			}
+		auto pair = layoutMap_.emplace(hash, VertexInputLayout());
+		Assert(pair.second);
+		VertexInputLayout& layout = pair.first->second;
 
-			HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(desc, count, shader.GetByteCode(), shader.GetBiteCodeSize(), &layouts_[useCount_]);
-			THROW_IF_FAILED(hr);
-			attributeSet_[useCount_].shaderAttr = shader.GetVertexAttribute();
-			attributeSet_[useCount_].vertexAttr = vertexAttr;
-			useCount_++;
+		D3D11_INPUT_ELEMENT_DESC desc[16];
+		uint32_t count = 0;
+		uint32_t offset = 0;
+		if (vertexAttr & VERTEX_ATTR_FLAG_POSITION) {
+			D3D11_INPUT_ELEMENT_DESC t = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 12;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_NORMAL) {
+			D3D11_INPUT_ELEMENT_DESC t = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 12;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_COLOR) {
+			D3D11_INPUT_ELEMENT_DESC t = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 16;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_TEXCOORD0) {
+			D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 8;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_TEXCOORD1) {
+			D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 8;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_TEXCOORD2) {
+			D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 2, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 8;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_TEXCOORD3) {
+			D3D11_INPUT_ELEMENT_DESC t = { "TEXCOORD", 3, DXGI_FORMAT_R32G32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 8;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_TANGENT) {
+			D3D11_INPUT_ELEMENT_DESC t = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 12;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_BITANGENT) {
+			D3D11_INPUT_ELEMENT_DESC t = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 12;
+			count++;
 		}
 
-		return layouts_[i];
+		HRESULT hr = GraphicsCore::GetDevice()->CreateInputLayout(desc, count, shader.GetByteCode(), shader.GetByteCodeSize(), &layout.layout);
+		Assert(SUCCEEDED(hr));
+		layout.shaderAttr = shader.GetVertexAttribute();
+		layout.vertexAttr = vertexAttr;
+
+		return &layout;
 	}
 
 	// === VertexShader ====================================================================================
@@ -327,6 +303,12 @@ namespace se
 	}
 
 	VertexShader::~VertexShader()
+	{
+		COMPTR_RELEASE(shader_);
+		COMPTR_RELEASE(blob_);
+	}
+
+	void VertexShader::Destroy()
 	{
 		COMPTR_RELEASE(shader_);
 		COMPTR_RELEASE(blob_);
@@ -395,6 +377,11 @@ namespace se
 		COMPTR_RELEASE(shader_);
 	}
 
+	void PixelShader::Destroy()
+	{
+		COMPTR_RELEASE(shader_);
+	}
+
 	void PixelShader::CreateFromByteCode(const void* data, int size, ShaderReflection* reflection)
 	{
 		HRESULT hr = GraphicsCore::GetDevice()->CreatePixelShader(data, size, nullptr, &shader_);
@@ -450,6 +437,99 @@ namespace se
 	void ShaderSet::PSCompileFromString(const char * source, int length, const char * entryPoint)
 	{
 		ps_.CompileFromString(source, length, entryPoint);
+	}
+
+
+
+	/* ********************************************************************************************* */
+
+	void ShaderManager::Initialize(const char* directoryPath)
+	{
+		try {
+			// シェーダ定義ファイル読み込み
+			std::string directory = directoryPath;
+			directory += "\\";
+			std::string definisionFile = directory + "shaders.json";
+			picojson::value json;
+			std::ifstream stream(definisionFile);
+			stream >> json;
+			stream.close();
+			picojson::array& defines = json.get<picojson::array>();
+
+			// シェーダコンパイル
+			auto hasher = std::hash<std::string>();
+			for (auto& s : defines) {
+				auto& obj = s.get<picojson::object>();
+				std::string name = obj["Name"].get<std::string>();
+				std::string fileName = directory + obj["FileName"].get<std::string>();
+				std::string vs = obj["VSEntry"].get<std::string>();
+				std::string ps = obj["PSEntry"].get<std::string>();
+
+				size_t shaderHash = hasher(name);
+				auto pair = shaderMap_.emplace(shaderHash, ShaderSet());
+				Assert(pair.second);
+				ShaderSet& shader = pair.first->second;
+
+				Printf("Shader Compile / %s : %s\n", name.c_str(), fileName.c_str());
+				shader.vs_.CompileFromFile(fileName.c_str(), vs.c_str());
+				if (ps.length() > 0) {
+					shader.ps_.CompileFromFile(fileName.c_str(), ps.c_str());
+				}
+			}
+			directoryPath_ = directoryPath;
+		}
+		catch (...) {
+			Printf("Shader Compile Failed.\n");
+			shaderMap_.clear();
+		}
+	}
+
+	void ShaderManager::Finalize()
+	{
+		shaderMap_.clear();
+	}
+
+	void ShaderManager::Reload()
+	{
+		try {
+			// シェーダ定義ファイル読み込み
+			std::string directory = directoryPath_;
+			directory += "\\";
+			std::string definisionFile = directory + "shaders.json";
+			picojson::value json;
+			std::ifstream stream(definisionFile);
+			stream >> json;
+			stream.close();
+			picojson::array& defines = json.get<picojson::array>();
+
+			// シェーダコンパイル
+			auto hasher = std::hash<std::string>();
+			for (auto& s : defines) {
+				auto& obj = s.get<picojson::object>();
+				std::string name = obj["Name"].get<std::string>();
+				std::string fileName = directory + obj["FileName"].get<std::string>();
+				std::string vs = obj["VSEntry"].get<std::string>();
+				std::string ps = obj["PSEntry"].get<std::string>();
+
+				size_t shaderHash = hasher(name);
+				ShaderSet* shader = Find(shaderHash);
+				if (shader) {
+					// 元のシェーダを破棄
+					shader->vs_.Destroy();
+					shader->ps_.Destroy();
+
+					Printf("Shader Compile / %s : %s\n", name.c_str(), fileName.c_str());
+					shader->vs_.CompileFromFile(fileName.c_str(), vs.c_str());
+					if (ps.length() > 0) {
+						shader->ps_.CompileFromFile(fileName.c_str(), ps.c_str());
+					}
+				}
+			}
+		}
+		catch (...) {
+			Printf("Shader Compile Failed.\n");
+			shaderMap_.clear();
+		}
 	}
 
 }

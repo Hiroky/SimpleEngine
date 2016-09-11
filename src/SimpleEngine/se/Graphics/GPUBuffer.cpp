@@ -7,6 +7,48 @@
 
 namespace se
 {
+#pragma region ConstantBuffer
+
+	ConstantBuffer::ConstantBuffer()
+		: buffer_(nullptr)
+	{
+	}
+
+	ConstantBuffer::~ConstantBuffer()
+	{
+		COMPTR_RELEASE(buffer_);
+	}
+
+	void ConstantBuffer::Create(uint32_t size, BufferUsage usage)
+	{
+		Assert(size % 16 == 0);
+		D3D11_BUFFER_DESC bd;
+		ZeroMemory(&bd, sizeof(bd));
+		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		bd.ByteWidth = size;
+		switch (usage)
+		{
+		case BUFFER_USAGE_DYNAMIC:
+			bd.Usage = D3D11_USAGE_DYNAMIC;
+			bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			break;
+		default:
+			bd.Usage = D3D11_USAGE_DEFAULT;
+			bd.CPUAccessFlags = 0;
+			break;
+		}
+
+		THROW_IF_FAILED(GraphicsCore::GetDevice()->CreateBuffer(&bd, nullptr, &buffer_));
+		size_ = size;
+	}
+
+	void ConstantBuffer::Update(GraphicsContext& context, const void* data, uint32_t size)
+	{
+		context.UpdateSubresource(*this, data, size);
+	}
+
+#pragma endregion
+
 #pragma region GPUResource
 
 	GPUResource::GPUResource()
@@ -34,94 +76,93 @@ namespace se
 
 	namespace
 	{
-		uint ComputeVertexStride(uint attr)
+		uint32_t ComputeVertexStride(uint32_t attr)
 		{
-			uint size = 0;
-			if (attr & VERTEX_ATTR_POSITION) size += 12;
-			if (attr & VERTEX_ATTR_NORMAL) size += 12;
-			if (attr & VERTEX_ATTR_COLOR) size += 16;
-			if (attr & VERTEX_ATTR_TEXCOORD0) size += 8;
-			if (attr & VERTEX_ATTR_TEXCOORD1) size += 8;
-			if (attr & VERTEX_ATTR_TEXCOORD2) size += 8;
-			if (attr & VERTEX_ATTR_TEXCOORD3) size += 8;
-			if (attr & VERTEX_ATTR_TANGENT) size += 12;
-			if (attr & VERTEX_ATTR_BITANGENT) size += 12;
-			if (attr & VERTEX_ATTR_BLENDWEIGHT) size += 16;
-			if (attr & VERTEX_ATTR_BLENDINDECES) size += 4;
+			uint32_t size = 0;
+			if (attr & VERTEX_ATTR_FLAG_POSITION) size += 12;
+			if (attr & VERTEX_ATTR_FLAG_NORMAL) size += 12;
+			if (attr & VERTEX_ATTR_FLAG_COLOR) size += 16;
+			if (attr & VERTEX_ATTR_FLAG_TEXCOORD0) size += 8;
+			if (attr & VERTEX_ATTR_FLAG_TEXCOORD1) size += 8;
+			if (attr & VERTEX_ATTR_FLAG_TEXCOORD2) size += 8;
+			if (attr & VERTEX_ATTR_FLAG_TEXCOORD3) size += 8;
+			if (attr & VERTEX_ATTR_FLAG_TANGENT) size += 12;
+			if (attr & VERTEX_ATTR_FLAG_BITANGENT) size += 12;
 			return size;
 		}
 	}
 
 	VertexBuffer::VertexBuffer()
-		: layout_(nullptr)
-		, stride_(0)
+		: stride_(0)
 		, attributes_(0)
 	{
 	}
 
 	VertexBuffer::~VertexBuffer()
 	{
-		layout_ = nullptr;
 	}
 
-	void VertexBuffer::CreateBuffer(const VertexBufferDesc& desc)
+	void VertexBuffer::Create(const void * data, uint32_t size, VertexAttributeFlags attributes, BufferUsage usage, bool unorderedAccess)
 	{
+		Assert(!resource_);
+
 		// 頂点バッファの設定
-		// DYNAMICに対応する
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.CPUAccessFlags = 0;
-		bd.ByteWidth = desc.size;
+		bd.ByteWidth = size;
 
-		if (desc.canUnorderedAccess) {
+		if (unorderedAccess) {
 			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_UNORDERED_ACCESS;
 			bd.Usage = D3D11_USAGE_DEFAULT;
-		} else {
+			bd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+		}
+		else {
 			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			bd.Usage = D3D11_USAGE_IMMUTABLE;
+			if (usage == BUFFER_USAGE_DYNAMIC) {
+				bd.Usage = D3D11_USAGE_DYNAMIC;
+				bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			}
+			else if (usage == BUFFER_USAGE_DEFAULT) {
+				bd.Usage = D3D11_USAGE_DEFAULT;
+			}
+			else {
+				bd.Usage = D3D11_USAGE_IMMUTABLE;
+			}
 		}
 
 		// サブリソースの設定
 		D3D11_SUBRESOURCE_DATA* pInit = nullptr;
 		D3D11_SUBRESOURCE_DATA initData;
-		if (desc.data) {
+		if (data) {
 			ZeroMemory(&initData, sizeof(initData));
-			initData.pSysMem = desc.data;
+			initData.pSysMem = data;
 			pInit = &initData;
 		}
 
 		// 頂点バッファ生成
 		ID3D11Buffer* buffer;
-		HRESULT hr = GraphicsCore::GetDevice()->CreateBuffer(&bd, pInit, &buffer);
-		THROW_IF_FAILED(hr);
+		THROW_IF_FAILED(GraphicsCore::GetDevice()->CreateBuffer(&bd, pInit, &buffer));
 
 		resource_ = buffer;
-		stride_ = ComputeVertexStride(desc.attributes);
-		attributes_ = desc.attributes;
+		stride_ = ComputeVertexStride(attributes);
+		attributes_ = attributes;
 
 		// アンオーダードアクセスビューを生成
-		if (desc.canUnorderedAccess) {
+		if (unorderedAccess) {
 			D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
 			uavDesc.Buffer.FirstElement = 0;
-			uavDesc.Buffer.Flags = 0;
-			uavDesc.Buffer.NumElements = desc.size / stride_;
+			uavDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW;
+			uavDesc.Buffer.NumElements = size / 4;
 			uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-			uavDesc.Format = DXGI_FORMAT_R32_UINT;
-			//hr = GraphicsCore::GetDevice()->CreateUnorderedAccessView(resource_, &uavDesc, &m_pUnorderedAccessView);
-			THROW_IF_FAILED(hr);
+			uavDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+			THROW_IF_FAILED(GraphicsCore::GetDevice()->CreateUnorderedAccessView(resource_, &uavDesc, &uav_));
 		}
-
 	}
 
-	void VertexBuffer::DestroyBuffer()
+	void VertexBuffer::Destroy()
 	{
 		GPUResource::Destroy();
-	}
-
-	void VertexBuffer::SetupVertexLayout(const VertexShader& shader)
-	{
-		layout_ = VertexLayoutManager::GetLayout(shader, attributes_);
-		assert(layout_);
 	}
 
 #pragma endregion
@@ -136,7 +177,7 @@ namespace se
 	{
 	}
 
-	void IndexBuffer::CreateBuffer(const void * data, uint size, IndexBufferStride stride)
+	void IndexBuffer::Create(const void * data, uint32_t size, IndexBufferStride stride)
 	{
 		D3D11_BUFFER_DESC ibd;
 		ibd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -153,7 +194,7 @@ namespace se
 		resource_ = buffer;
 	}
 
-	void IndexBuffer::DestroyBuffer()
+	void IndexBuffer::Destroy()
 	{
 		GPUResource::Destroy();
 	}
@@ -178,27 +219,80 @@ namespace se
 #pragma region ColorBuffer
 
 	ColorBuffer::ColorBuffer()
-		: rtvs_(nullptr)
-		, viewCount_(0)
+		: rtv_(nullptr)
 	{
 	}
 
 	ColorBuffer::~ColorBuffer()
 	{
-		if (rtvs_) {
-			for (uint i = 0; i < viewCount_; i++) {
-				COMPTR_RELEASE(rtvs_[i]);
-			}
-			delete [] rtvs_;
-			rtvs_ = nullptr;
-		}
+		COMPTR_RELEASE(rtv_);
 	}
 
 	void ColorBuffer::InitializeDisplayBuffer(ID3D11RenderTargetView* renderTarget)
 	{
-		rtvs_ = new ID3D11RenderTargetView*[1];
-		rtvs_[0] = renderTarget;
-		viewCount_ = 1;
+		rtv_ = renderTarget;
+	}
+
+	void ColorBuffer::Create2D(DXGI_FORMAT format, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t mips)
+	{
+		Assert(!resource_);
+		mips = se::Max<uint32_t>(1, mips);
+		width_ = width;
+		height_ = height;
+		depth_ = arraySize;
+		format_ = format;
+
+		// テクスチャ生成
+		D3D11_TEXTURE2D_DESC objdesc;
+		ZeroMemory(&objdesc, sizeof(objdesc));
+		objdesc.Width = width;
+		objdesc.Height = height;
+		objdesc.MipLevels = mips;
+		objdesc.ArraySize = arraySize;
+		objdesc.SampleDesc.Count = 1;
+		objdesc.SampleDesc.Quality = 0;
+		objdesc.MiscFlags = 0;
+		objdesc.Format = format;
+		objdesc.Usage = D3D11_USAGE_DEFAULT;
+		objdesc.CPUAccessFlags = 0;
+		objdesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+
+		//	テクスチャ生成
+		auto* device = GraphicsCore::GetDevice();
+		ID3D11Texture2D* texture;
+		THROW_IF_FAILED(device->CreateTexture2D(&objdesc, nullptr, &texture));
+		resource_ = texture;
+
+		//	シェーダリソースビュー
+		bool isArray = (arraySize > 1);
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+		memset(&srvDesc, 0, sizeof(srvDesc));
+		srvDesc.Format = format;
+		if (isArray) {
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+			srvDesc.Texture2DArray.ArraySize = arraySize;
+			srvDesc.Texture2DArray.MipLevels = mips;
+		}
+		else {
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MipLevels = mips;
+		}
+		THROW_IF_FAILED(device->CreateShaderResourceView(texture, &srvDesc, &srv_));
+
+		// レンダーターゲットビュー
+		D3D11_RENDER_TARGET_VIEW_DESC rdesc;
+		rdesc.Format = format;
+		rdesc.ViewDimension = (arraySize > 1 || mips > 1) ? D3D11_RTV_DIMENSION_TEXTURE2DARRAY : D3D11_RTV_DIMENSION_TEXTURE2D;
+		rdesc.Texture2DArray.ArraySize = 1;
+		rdesc.Texture2DArray.MipSlice = 0;
+		rdesc.Texture2DArray.FirstArraySlice = 0;
+		THROW_IF_FAILED(device->CreateRenderTargetView(texture, &rdesc, &rtv_));
+	}
+
+	void ColorBuffer::Destroy()
+	{
+		COMPTR_RELEASE(rtv_);
+		PixelBuffer::Destroy();
 	}
 
 #pragma endregion
@@ -214,7 +308,7 @@ namespace se
 		COMPTR_RELEASE(dsv_);
 	}
 
-	void DepthStencilBuffer::Initialize(uint width, uint height)
+	void DepthStencilBuffer::Create(uint32_t width, uint32_t height)
 	{
 		auto* device = GraphicsCore::GetDevice();
 
@@ -247,6 +341,12 @@ namespace se
 		THROW_IF_FAILED(hr);
 	}
 
+	void DepthStencilBuffer::Destroy()
+	{
+		COMPTR_RELEASE(dsv_);
+		PixelBuffer::Destroy();
+	}
+
 #pragma endregion
 
 #pragma region Texture
@@ -264,10 +364,11 @@ namespace se
 		wchar_t buffer[255] = { 0 };
 		size_t size;
 		mbstowcs_s(&size, buffer, fileName, sizeof(buffer));
-		DirectX::CreateDDSTextureFromFile(GraphicsCore::GetDevice(), buffer, &resource_, &srv_);
+		auto hr = DirectX::CreateDDSTextureFromFile(GraphicsCore::GetDevice(), buffer, &resource_, &srv_);
+		THROW_IF_FAILED(hr);
 	}
 
-	void Texture::LoadFromMemory(const void * data, uint size)
+	void Texture::LoadFromMemory(const void * data, uint32_t size)
 	{
 		DirectX::CreateDDSTextureFromMemory(GraphicsCore::GetDevice(), reinterpret_cast<const byte*>(data), static_cast<size_t>(size), &resource_, &srv_);
 	}

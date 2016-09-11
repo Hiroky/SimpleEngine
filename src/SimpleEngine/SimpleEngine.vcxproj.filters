@@ -35,14 +35,17 @@
     <ClInclude Include="se\Graphics\DDSTextureLoader.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="se\Math\Vector.h">
-      <Filter>src\Math</Filter>
-    </ClInclude>
     <ClInclude Include="se\Graphics\GraphicsStates.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="se\Graphics\GraphicsCommon.h">
       <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Math\Math.h">
+      <Filter>src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\picojson\picojson.h">
+      <Filter>thirdparty\picojson</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,9 +74,6 @@
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="se\Math\Vector.cpp">
-      <Filter>src\Math</Filter>
-    </ClCompile>
     <ClCompile Include="se\Graphics\GraphicsStates.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
@@ -87,6 +87,12 @@
     </Filter>
     <Filter Include="src\Math">
       <UniqueIdentifier>{acab3b97-9c1c-4f95-91ab-39ed5856738b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{207941ee-bf02-4ec4-ac93-fd44c6fe577c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\picojson">
+      <UniqueIdentifier>{41e340f1-2639-4969-bc4d-aca5ec94e7f1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

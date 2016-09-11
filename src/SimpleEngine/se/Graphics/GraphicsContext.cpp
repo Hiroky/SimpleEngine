@@ -28,11 +28,11 @@ namespace se
 		COMPTR_RELEASE(deviceContext_);
 	}
 
-	void GraphicsContext::SetRenderTarget(const ColorBuffer* colorBuffers, uint count, const DepthStencilBuffer* depthStencil)
+	void GraphicsContext::SetRenderTarget(const ColorBuffer* colorBuffers, uint32_t count, const DepthStencilBuffer* depthStencil)
 	{
 		ID3D11RenderTargetView* rtvs[8] = { nullptr };
 		if (colorBuffers) {
-			for (uint i = 0; i < count; i++) {
+			for (uint32_t i = 0; i < count; i++) {
 				rtvs[i] = colorBuffers[i].GetRTV();
 			}
 		}
@@ -42,7 +42,7 @@ namespace se
 
 	void GraphicsContext::ClearRenderTarget(const ColorBuffer& target, const float4& color)
 	{
-		deviceContext_->ClearRenderTargetView(target.GetRTV(), color.v);
+		deviceContext_->ClearRenderTargetView(target.GetRTV(), color.ToFloatArray());
 	}
 
 	void GraphicsContext::ClearDepthStencil(const DepthStencilBuffer& target, float depth)
@@ -70,19 +70,44 @@ namespace se
 		deviceContext_->RSSetState(raster.state_);
 	}
 
+	void GraphicsContext::SetPrimitiveType(PrimitiveType type)
+	{
+		static const D3D_PRIMITIVE_TOPOLOGY types[] = {
+			D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
+			D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+		};
+		deviceContext_->IASetPrimitiveTopology(types[type]);
+	}
+
+	void GraphicsContext::SetViewport(const Rect& rect, float minDepth, float maxDepth)
+	{
+		D3D11_VIEWPORT vp;
+		vp.TopLeftX = static_cast<float>(rect.x);
+		vp.TopLeftY = static_cast<float>(rect.y);
+		vp.Width = static_cast<float>(rect.width);
+		vp.Height = static_cast<float>(rect.height);
+		vp.MinDepth = minDepth;
+		vp.MaxDepth = maxDepth;
+		deviceContext_->RSSetViewports(1, &vp);
+	}
+
+	void GraphicsContext::SetScissorRect(const Rect& rect)
+	{
+		D3D11_RECT r = { rect.x, rect.y, rect.width, rect.height };
+		deviceContext_->RSSetScissorRects(1, &r);
+	}
+
+	void GraphicsContext::SetInputLayout(const VertexInputLayout& layout)
+	{
+		deviceContext_->IASetInputLayout(layout.layout);
+	}
+
 	void GraphicsContext::SetVertexBuffer(int slot, const VertexBuffer* vb)
 	{
-		if (!vb) {
-			//deviceContext_->IASetVertexBuffers(0, , nullptr, 0);
-			return;
-		}
 		ID3D11Buffer* buffers[] = { vb->Get<ID3D11Buffer>() };
-		uint stride = vb->GetStride();
-		uint offset = 0;
+		uint32_t stride = vb->GetStride();
+		uint32_t offset = 0;
 		deviceContext_->IASetVertexBuffers(slot, 1, buffers, &stride, &offset);
-
-		// レイアウト
-		deviceContext_->IASetInputLayout(vb->GetLayout());
 	}
 
 	void GraphicsContext::SetIndexBuffer(const IndexBuffer* ib)
@@ -90,25 +115,31 @@ namespace se
 		deviceContext_->IASetIndexBuffer(ib->Get<ID3D11Buffer>(), DXGI_FORMAT_R32_UINT, 0);
 	}
 
-	void GraphicsContext::SetVSResource(uint slot, const GPUResource* resource)
+	void GraphicsContext::SetVSResource(uint32_t slot, const GPUResource* resource)
 	{
 		ID3D11ShaderResourceView* resources[] = { resource->GetSRV() };
 		deviceContext_->VSSetShaderResources(slot, 1, resources);
 	}
 
-	void GraphicsContext::SetPSResource(uint slot, const GPUResource* resource)
+	void GraphicsContext::SetPSResource(uint32_t slot, const GPUResource* resource)
 	{
 		ID3D11ShaderResourceView* resources[] = { resource->GetSRV() };
 		deviceContext_->PSSetShaderResources(slot, 1, resources);
 	}
 
-	void GraphicsContext::SetPSSamplerState(uint slot, const SamplerState& sampler)
+	void GraphicsContext::SetPSSamplerState(uint32_t slot, const SamplerState& sampler)
 	{
 		deviceContext_->PSSetSamplers(slot, 1, &sampler.state_);
 	}
 
-	void GraphicsContext::DrawIndexed(uint indexStart, uint indexCount)
+	void GraphicsContext::DrawIndexed(uint32_t indexStart, uint32_t indexCount)
 	{
 		deviceContext_->DrawIndexed(indexCount, indexStart, 0);
 	}
+
+	void GraphicsContext::UpdateSubresource(ConstantBuffer& resource, const void* data, size_t size)
+	{
+		deviceContext_->UpdateSubresource(resource.buffer_, 0, nullptr, data, 0, 0);
+	}
+
 }

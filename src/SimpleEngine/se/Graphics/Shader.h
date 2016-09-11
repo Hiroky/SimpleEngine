@@ -3,12 +3,15 @@
 #include "se/Common.h"
 #include "se/Graphics/GraphicsCommon.h"
 #include "se/Graphics/GraphicsContext.h"
+#include <unordered_map>
 
 namespace se
 {
-	//
-	// シェーダリフレクション
-	//
+	class ShaderManager;
+
+	/**
+	 * シェーダリフレクション
+	 */
 	class ShaderReflection
 	{
 	private:
@@ -19,34 +22,63 @@ namespace se
 		~ShaderReflection();
 
 		void Create(const void* data, size_t size);
-		uint GetVertexLayoutAttribute();
-		bool FindConstantBufferByName(const char* name, uint* out_bindIndex);
-		bool FindUniformVariableByName(const char* name, uint* out_offset = NULL, uint* size = NULL);
-		bool FindTextureBindByName(const char* name, uint* out_bindIndex);
+		uint32_t GetVertexLayoutAttribute();
+		bool FindConstantBufferByName(const char* name, uint32_t* out_bindIndex);
+		bool FindUniformVariableByName(const char* name, uint32_t* out_offset = NULL, uint32_t* size = NULL);
+		bool FindTextureBindByName(const char* name, uint32_t* out_bindIndex);
 	};
 
-	//
-	// 頂点レイアウト管理
-	//
+	/**
+	 * 頂点レイアウト
+	 */
+	struct VertexInputLayout
+	{
+		ID3D11InputLayout* layout;
+		uint32_t vertexAttr;
+		uint32_t shaderAttr;
+
+		VertexInputLayout()
+			: layout(nullptr)
+			, vertexAttr(0)
+			, shaderAttr(0)
+		{
+		}
+
+		~VertexInputLayout()
+		{
+			COMPTR_RELEASE(layout);
+		}
+	};
+
+	/**
+	 * 頂点レイアウト管理
+	 */
 	class VertexLayoutManager
 	{
+	public:
+		static VertexLayoutManager& Get() {
+			static VertexLayoutManager instance;
+			return instance;
+		}
+	private:
+		VertexLayoutManager() {}
+		~VertexLayoutManager() {}
+
 	private:
 		struct AttributeSet
 		{
-			uint vertexAttr;
-			uint shaderAttr;
+			uint32_t vertexAttr;
+			uint32_t shaderAttr;
 		};
 
 	private:
-		static ID3D11InputLayout* layouts_[64];
-		static AttributeSet attributeSet_[64];
-		static uint useCount_;
+		std::unordered_map<size_t, VertexInputLayout> layoutMap_;
 
 	public:
-		static void Initialize();
-		static void Finalize();
+		void Initialize();
+		void Finalize();
 
-		static ID3D11InputLayout* GetLayout(const VertexShader& shader, uint vertexAttr);
+		const VertexInputLayout* FindLayout(const VertexShader& shader, uint32_t vertexAttr);
 	};
 
 	//
@@ -55,10 +87,11 @@ namespace se
 	class VertexShader
 	{
 		friend GraphicsContext;
+		friend ShaderManager;
 
 	private:
 		ID3D11VertexShader* shader_;
-		uint vertexAttribute_;
+		uint32_t vertexAttribute_;
 		ID3DBlob* blob_;
 		const void* data_;
 		size_t dataSize_;
@@ -66,11 +99,12 @@ namespace se
 	public:
 		VertexShader();
 		~VertexShader();
+		void Destroy();
 
 		ID3D11VertexShader* Get() const { return shader_; }
 		const void* GetByteCode() const { return data_; }
-		size_t GetBiteCodeSize() const { return dataSize_; }
-		uint GetVertexAttribute() const { return vertexAttribute_; }
+		size_t GetByteCodeSize() const { return dataSize_; }
+		uint32_t GetVertexAttribute() const { return vertexAttribute_; }
 		void CreateFromByteCode(const void* data, int size, ShaderReflection* reflection = nullptr);
 		void CompileFromFile(const char* fileName, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 		void CompileFromString(const char* source, int length, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
@@ -82,6 +116,7 @@ namespace se
 	class PixelShader
 	{
 		friend GraphicsContext;
+		friend ShaderManager;
 
 	private:
 		ID3D11PixelShader* shader_;
@@ -89,6 +124,7 @@ namespace se
 	public:
 		PixelShader();
 		~PixelShader();
+		void Destroy();
 
 		ID3D11PixelShader* Get() const { return shader_; }
 		void CreateFromByteCode(const void* data, int size, ShaderReflection* reflection = nullptr);
@@ -102,6 +138,8 @@ namespace se
 	//
 	class ShaderSet
 	{
+		friend ShaderManager;
+
 	private:
 		VertexShader vs_;
 		PixelShader ps_;
@@ -115,6 +153,38 @@ namespace se
 
 		void VSCompileFromString(const char* source, int length, const char* entryPoint = "main");
 		void PSCompileFromString(const char* source, int length, const char* entryPoint = "main");
+	};
+
+	/**
+	* シェーダ管理
+	*/
+	class ShaderManager
+	{
+	public:
+		static ShaderManager& Get() {
+			static ShaderManager instance;
+			return instance;
+		}
+
+	private:
+		std::string directoryPath_;
+		std::unordered_map<size_t, ShaderSet> shaderMap_;
+
+	public:
+		void Initialize(const char* directoryPath);
+		void Finalize();
+		void Reload();
+
+		ShaderSet* Find(const char* name)
+		{
+			static std::hash<std::string> hasher;
+			return Find(hasher(name));
+		}
+		ShaderSet* Find(size_t hash)
+		{
+			auto& iter = shaderMap_.find(hash);
+			return (iter != shaderMap_.end()) ? &iter->second : nullptr;
+		}
 	};
 
 }

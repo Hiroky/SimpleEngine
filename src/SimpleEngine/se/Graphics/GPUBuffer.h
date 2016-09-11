@@ -8,6 +8,7 @@ namespace se
 {
 	enum BufferUsage
 	{
+		BUFFER_USAGE_DEFAULT,
 		BUFFER_USAGE_IMMUTABLE,		// 不変バッファ
 		BUFFER_USAGE_GPU_WRITE,		// GPUから書き込み可能
 		BUFFER_USAGE_DYNAMIC,		// CPU, GPUから書き込み可能
@@ -19,19 +20,30 @@ namespace se
 		INDEX_BUFFER_STRIDE_U32,
 	};
 
-	struct VertexBufferDesc
+
+	/**
+	 * コンスタントバッファ
+	 */
+	class ConstantBuffer
 	{
-		const void* data;
-		uint size;
-		uint attributes;
-		bool canUnorderedAccess;
-		BufferUsage usage;
+		friend class GraphicsContext;
+
+	private:
+		ID3D11Buffer* buffer_;
+		uint32_t size_;
+
+	public:
+		ConstantBuffer();
+		virtual ~ConstantBuffer();
+
+		void Create(uint32_t size, BufferUsage usage);
+		void Update(GraphicsContext& context, const void* data, uint32_t size);
 	};
 
 
-	//
-	// GPUで使用されるリソース
-	//
+	/**
+	 * GPUで使用されるリソース
+	 */
 	class GPUResource
 	{
 	protected:
@@ -39,13 +51,10 @@ namespace se
 		ID3D11ShaderResourceView*	srv_;
 		ID3D11UnorderedAccessView*	uav_;
 
-
-	protected:
-		void Destroy();
-
 	public:
 		GPUResource();
 		virtual ~GPUResource();
+		virtual void Destroy();
 
 		ID3D11Resource* GetResource() const { return resource_; }
 		ID3D11ShaderResourceView* GetSRV() const { return srv_; }
@@ -56,80 +65,76 @@ namespace se
 	};
 
 	
-	//
-	// 頂点バッファ
-	//
+	/**
+	 * 頂点バッファ
+	 */
 	class VertexBuffer : public GPUResource
 	{
 	private:
-		ID3D11InputLayout* layout_;
-		uint stride_;
-		uint attributes_;
+		uint32_t stride_;
+		uint32_t attributes_;
 
 	public:
 		VertexBuffer();
 		virtual ~VertexBuffer();
 
-		void CreateBuffer(const VertexBufferDesc& desc);
-		void DestroyBuffer();
-		void SetupVertexLayout(const VertexShader& shader);
+		void Create(const void* data, uint32_t size, VertexAttributeFlags attributes, BufferUsage usage = BUFFER_USAGE_IMMUTABLE, bool unorderedAccess = false);
+		virtual void Destroy() override;
 
-		ID3D11InputLayout* GetLayout() const { return layout_; };
-		uint GetStride() const { return stride_; }
-		uint GetAttributes() const { return attributes_; }
+		uint32_t GetStride() const { return stride_; }
+		uint32_t GetAttributes() const { return attributes_; }
 	};
 
 	
-	//
-	// インデックスバッファ
-	//
+	/**
+	 * インデックスバッファ
+	 */
 	class IndexBuffer : public GPUResource
 	{
 	private:
 		IndexBufferStride stride_;
-		uint bufferSize_;
-		uint indexCount_;
+		uint32_t bufferSize_;
+		uint32_t indexCount_;
 
 	public:
 		IndexBuffer();
 		virtual ~IndexBuffer();
 
-		void CreateBuffer(const void* data, uint size, IndexBufferStride stride);
-		void DestroyBuffer();
+		void Create(const void* data, uint32_t size, IndexBufferStride stride);
+		virtual void Destroy() override;
 	};
 
 
-	//
-	// ピクセルバッファ
-	//
+	/**
+	 * ピクセルバッファ
+	 */
 	class PixelBuffer : public GPUResource
 	{
 	protected:
-		uint width_;
-		uint height_;
-		uint depth_;
-		uint format_;	// TODO:フォーマットEnum定義
+		uint32_t width_;
+		uint32_t height_;
+		uint32_t depth_;
+		uint32_t format_;	// TODO:フォーマットEnum定義
 
 	public:
 		PixelBuffer();
 		virtual ~PixelBuffer();
 
-		uint GetWidth() const { return width_; }
-		uint GetHeight() const { return height_; }
-		uint GetDepth() const { return depth_; }
+		uint32_t GetWidth() const { return width_; }
+		uint32_t GetHeight() const { return height_; }
+		uint32_t GetDepth() const { return depth_; }
 	};
 	
 
-	//
-	// カラーバッファ
-	//
+	/**
+	 * カラーバッファ
+	 */
 	class ColorBuffer : public PixelBuffer
 	{
 		friend class GraphicsCore;
 
 	private:
-		ID3D11RenderTargetView** rtvs_;
-		uint viewCount_;
+		ID3D11RenderTargetView* rtv_;
 
 	private:
 		void InitializeDisplayBuffer(ID3D11RenderTargetView* renderTarget);
@@ -138,18 +143,20 @@ namespace se
 		ColorBuffer();
 		virtual ~ColorBuffer();
 
+		void Create2D(DXGI_FORMAT format, uint32_t width, uint32_t height, uint32_t arraySize = 1u, uint32_t mips = 1u);
 		// TODO:各種初期化対応
-		//void Initialize2D();
 		//void Initialize3D();
 		//void InitializeCube();
 
-		ID3D11RenderTargetView* GetRTV(uint index = 0) const { return rtvs_[index]; }
+		virtual void Destroy() override;
+
+		ID3D11RenderTargetView* GetRTV() const { return rtv_; }
 	};
 
 
-	//
-	// デプスステンシルバッファ
-	//
+	/**
+	 * デプスステンシルバッファ
+	 */
 	class DepthStencilBuffer : public PixelBuffer
 	{
 	private:
@@ -159,15 +166,16 @@ namespace se
 		DepthStencilBuffer();
 		virtual ~DepthStencilBuffer();
 
-		void Initialize(uint width, uint height); // TODO:フォーマット指定
+		void Create(uint32_t width, uint32_t height);
+		virtual void Destroy() override;
 
 		ID3D11DepthStencilView* GetDSV() const { return dsv_; }
 	};
 
 
-	//
-	// テクスチャリソース
-	//
+	/**
+	 * テクスチャリソース
+	 */
 	class Texture : public PixelBuffer
 	{
 	public:
@@ -175,6 +183,57 @@ namespace se
 		virtual ~Texture();
 
 		void LoadFromFile(const char* fileName);
-		void LoadFromMemory(const void* data, uint size);
+		void LoadFromMemory(const void* data, uint32_t size);
+	};
+
+
+	/**
+	 * ユニフォームパラメータ
+	 */
+	template <class T>
+	class TUniformParameter
+	{
+	private:
+		ConstantBuffer resource_;
+		T contents_;
+		bool isCreated_;
+		bool isUpdated_;
+
+	public:
+		TUniformParameter()
+			: isCreated_(false)
+			, isUpdated_(true)
+		{
+		}
+
+		void Destroy()
+		{
+			resource_.Destroy();
+			isCreated_ = false;
+		}
+
+		void Set(const T& buffer)
+		{
+			contents_ = buffer;
+			isUpdated_ = true;
+		}
+
+		void Update(GraphicsContext& context, bool forceUpdate = false)
+		{
+			if (!isCreated_) {
+				resource_.Create(sizeof(T), BUFFER_USAGE_DEFAULT);
+				isCreated_ = true;
+			}
+			if (isUpdated_ || forceUpdate) {
+				resource_.Update(context, &contents_, sizeof(T));
+				isUpdated_ = false;
+			}
+		}
+
+		T& Contents() { return contents_; }
+		const T& Contents() const { return contents_; }
+		void Updated() { isUpdated_ = true; }
+		const ConstantBuffer& GetResource() const { return resource_; }
+		bool IsCreated() const { return isCreated_; }
 	};
 }

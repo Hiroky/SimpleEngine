@@ -98,7 +98,7 @@ namespace se
 		displayBuffer_.InitializeDisplayBuffer(renderTargetView);
 
 		// デプスステンシルテクスチャ生成
-		displayDepthBuffer_.Initialize(width, height);
+		displayDepthBuffer_.Create(width, height);
 
 		//設定
 		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -122,15 +122,19 @@ namespace se
 		vp.TopLeftX = 0;
 		vp.TopLeftY = 0;
 		deviceContext->RSSetViewports(1, &vp);
+		D3D11_RECT rect;
+		rect.top = rect.left = 0;
+		rect.right = width;
+		rect.bottom = height;
+		deviceContext->RSSetScissorRects(1, &rect);
 
-		// TODO:シェーダ系のマネージャができたらそちらに移す
-		VertexLayoutManager::Initialize();
+		VertexLayoutManager::Get().Initialize();
 	}
 
 
 	void GraphicsCore::Finalize()
 	{
-		VertexLayoutManager::Finalize();
+		VertexLayoutManager::Get().Finalize();
 
 		immediateContext_.Finalize();
 		COMPTR_RELEASE(swapChain_);
@@ -138,7 +142,7 @@ namespace se
 	}
 
 
-	void GraphicsCore::Present(uint syncInterval, uint flags)
+	void GraphicsCore::Present(uint32_t syncInterval, uint32_t flags)
 	{
 		swapChain_->Present(syncInterval, flags);
 	}

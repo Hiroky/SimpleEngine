@@ -226,8 +226,9 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="se\Common.h" />
-    <ClInclude Include="se\Math\Vector.h" />
+    <ClInclude Include="se\Math\Math.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="thirdparty\picojson\picojson.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
@@ -262,12 +263,6 @@
     <ClCompile Include="se\Graphics\Window.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="se\Math\Vector.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

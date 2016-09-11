@@ -1,41 +1,5 @@
 #include "se/Graphics/Window.h"
 
-const char* vs_string = "\
-struct Vertex\
-{\
-	float4 a_position : POSITION;\
-	float2 a_texcoord0: TEXCOORD0;\
-};\
-\
-struct PSInput\
-{\
-	float4 v_position : SV_POSITION;\
-	float2 v_texcoord0: TEXCOORD0;\
-};\
-\
-PSInput main(Vertex v)\
-{\
-	PSInput o;\
-	o.v_position = v.a_position;\
-	o.v_texcoord0 = v.a_texcoord0;\
-	return o;\
-}\
-";
-
-const char* ps_string = "\
-Texture2D texture0 : register(t0);\
-SamplerState sampler0 : register(s0);\
-struct PSInput\
-{\
-	float4 v_position : SV_POSITION;\
-	float2 v_texcoord0: TEXCOORD0;\
-};\
-\
-float4 main(PSInput i) : SV_Target\
-{\
-	return texture0.Sample(sampler0, i.v_texcoord0);\
-}\
-";
 
 struct Vertex
 {
@@ -43,40 +7,34 @@ struct Vertex
 	se::float2 uv;
 };
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
 	se::Window::Initialize(hInstance, 1280, 720, L"SimpleEngine");
 	se::GraphicsCore::Initialize();
+	se::ShaderManager::Get().Initialize("shaders");
 	se::Window::Show();
 
-	se::ShaderSet shader;
-	shader.VSCompileFromString(vs_string, static_cast<int>(strlen(vs_string)));
-	shader.PSCompileFromString(ps_string, static_cast<int>(strlen(ps_string)));
+	// 描画用シェーダ
+	auto* quadShader = se::ShaderManager::Get().Find("ScreenQuad");
+	Assert(quadShader);
 
+	// 頂点データ
 	Vertex vertex[] = {
-		{ se::float3(0, 0.8f, 0), se::float2(0.5f, 0.0f) },
-		{ se::float3(-0.5f, -0.8f, 0), se::float2(0.0f, 1.0f) },
-		{ se::float3(0.5f, -0.8f, 0), se::float2(1.0f, 1.0f) },
+		{ se::float3(-1.0f,  1.0f, 0), se::float2(0.0f, 0.0f) },
+		{ se::float3(-1.0f, -1.0f, 0), se::float2(0.0f, 1.0f) },
+		{ se::float3( 1.0f, -1.0f, 0), se::float2(1.0f, 1.0f) },
+		{ se::float3( 1.0f,  1.0f, 0), se::float2(1.0f, 0.0f) },
 	};
-	uint index[] = { 0, 1, 2 };
+	uint32_t index[] = { 0, 1, 2, 0, 2, 3 };
 	se::VertexBuffer vertexBuffer;
-	se::VertexBufferDesc vbdesc = { 
-		vertex,
-		sizeof(vertex),
-		se::VERTEX_ATTR_POSITION | se::VERTEX_ATTR_TEXCOORD0,
-		false,
-		se::BUFFER_USAGE_IMMUTABLE 
-	};
-	vertexBuffer.CreateBuffer(vbdesc);
-	vertexBuffer.SetupVertexLayout(*shader.GetVS());
 	se::IndexBuffer indexBuffer;
-	indexBuffer.CreateBuffer(index, sizeof(index), se::INDEX_BUFFER_STRIDE_U32);
+	vertexBuffer.Create(vertex, sizeof(vertex), se::VERTEX_ATTR_FLAG_POSITION | se::VERTEX_ATTR_FLAG_TEXCOORD0);
+	indexBuffer.Create(index, sizeof(index), se::INDEX_BUFFER_STRIDE_U32);
+	const auto* layout = se::VertexLayoutManager::Get().FindLayout(*quadShader->GetVS(), vertexBuffer.GetAttributes());
 
+	// テクスチャ
 	se::Texture texture;
-	texture.LoadFromFile("test.dds");
+	texture.LoadFromFile("texture/test.dds");
 
 	// メインループ
 	MSG msg = { 0 };
@@ -90,13 +48,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			context->ClearRenderTarget(colorBuffer, se::float4(0.3f, 0.4f, 0.9f, 1.0f));
 			context->ClearDepthStencil(depthBuffer);
 
-			context->SetVertexShader(*shader.GetVS());
-			context->SetPixelShader(*shader.GetPS());
+			context->SetVertexShader(*quadShader->GetVS());
+			context->SetPixelShader(*quadShader->GetPS());
+			context->SetInputLayout(*layout);
 			context->SetVertexBuffer(0, &vertexBuffer);
 			context->SetIndexBuffer(&indexBuffer);
 			context->SetPSResource(0, &texture);
 			context->SetPSSamplerState(0, se::SamplerState::Get(se::SamplerState::LinearClamp));
-			context->DrawIndexed(0, 3);
+			context->SetDepthStencilState(se::DepthStencilState::Get(se::DepthStencilState::Disable));
+			context->SetRasterizerState(se::RasterizerState::Get(se::RasterizerState::NoCull));
+			context->DrawIndexed(0, 6);
 
 			se::GraphicsCore::Present(1, 0);
 		}
