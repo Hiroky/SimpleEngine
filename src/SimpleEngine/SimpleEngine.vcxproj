@@ -180,6 +180,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="C:\Users\Hiroki Morishita\Desktop\tinyobjloader-master\tiny_obj_loader.h" />
     <ClInclude Include="se\async\Async.h" />
     <ClInclude Include="se\async\Atomic.h" />
     <ClInclude Include="se\async\Threading.h" />
