@@ -2,7 +2,8 @@
 #include "HIDCore.h"
 
 
-namespace se {
+namespace se 
+{
 
 	Mouse HIDCore::mouse_;
 

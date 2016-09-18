@@ -1,7 +1,8 @@
 ﻿#include "se/HID/Mouse.h"
 #include "se/Graphics/Window.h"
 
-namespace se {
+namespace se 
+{
 
 	void Mouse::Update()
 	{
@@ -13,7 +14,7 @@ namespace se {
 		state_.y = info.y;
 		state_.lx = info.x - backup.x;
 		state_.ly = info.y - backup.y;
-		state_.lm = info.wheel;
+		state_.wheel = info.wheel;
 
 		//マウスボタン入力判定
 		static const uint32_t sMouseButton[] = {
@@ -36,7 +37,7 @@ namespace se {
 			}
 		}
 
-		
+		Window::ResetMouseEventInfo();
 	}
 
 }

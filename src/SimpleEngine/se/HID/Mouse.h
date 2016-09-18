@@ -20,11 +20,13 @@ namespace se
 	 */
 	struct MouseState
 	{
-		uint32_t x, y;			// 現在位置
-		uint32_t lx, ly, lm;	// 移動量
+		uint32_t x, y;		// 現在位置
+		uint32_t lx, ly;	// 移動量
+		float wheel;
 
 		void Crear() {
-			x = y = lx = ly = lm = 0;
+			x = y = lx = ly = 0;
+			wheel = 0;
 		}
 	};
 

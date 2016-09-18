@@ -102,9 +102,6 @@ namespace se
 		// デプスステンシルテクスチャ生成
 		displayDepthBuffer_.Create(width_, height_);
 
-		//設定
-		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
 		// コンテキスト
 		immediateContext_.Initialize(deviceContext);
 
@@ -114,11 +111,10 @@ namespace se
 		DepthStencilState::Initialize();
 		RasterizerState::Initialize();
 		immediateContext_.SetRasterizerState(RasterizerState::Get(RasterizerState::BackFaceCull));
-
-		// ビューポート
-		Rect rect(0, 0, width_, height_);
+		immediateContext_.SetPrimitiveType(PRIMITIVE_TYPE_TRIANGLE_LIST);
 		immediateContext_.SetViewportAndScissorRect(Rect(0, 0, width_, height_));
 
+		// 頂点レイアウトマネージャ
 		VertexLayoutManager::Get().Initialize();
 	}
 

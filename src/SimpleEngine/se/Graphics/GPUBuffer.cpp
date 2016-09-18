@@ -526,11 +526,27 @@ namespace se
 		mbstowcs_s(&size, buffer, fileName, sizeof(buffer));
 		auto hr = DirectX::CreateDDSTextureFromFile(GraphicsCore::GetDevice(), buffer, &resource_, &srv_);
 		THROW_IF_FAILED(hr);
+
+		// 2D only
+		ID3D11Texture2D* texture = (ID3D11Texture2D*)resource_;
+		D3D11_TEXTURE2D_DESC desc;
+		texture->GetDesc(&desc);
+		width_ = desc.Width;
+		height_ = desc.Height;
+		depth_ = desc.ArraySize;
 	}
 
-	void Texture::LoadFromMemory(const void * data, uint32_t size)
+	void Texture::LoadFromMemory(const void* data, uint32_t size)
 	{
 		DirectX::CreateDDSTextureFromMemory(GraphicsCore::GetDevice(), reinterpret_cast<const byte*>(data), static_cast<size_t>(size), &resource_, &srv_);
+		
+		// 2D only
+		ID3D11Texture2D* texture = (ID3D11Texture2D*)resource_;
+		D3D11_TEXTURE2D_DESC desc;
+		texture->GetDesc(&desc);
+		width_ = desc.Width;
+		height_ = desc.Height;
+		depth_ = desc.ArraySize;
 	}
 
 #pragma endregion

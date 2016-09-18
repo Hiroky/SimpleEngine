@@ -219,7 +219,7 @@ namespace se {
 
 		auto& mouse = HIDCore::GetMouse();
 		auto& mouseInfo = mouse.GetMouseInfo();
-		io.MouseWheel += mouseInfo.lm;
+		io.MouseWheel += mouseInfo.wheel;
 		io.MousePos.x = static_cast<float>(mouseInfo.x);
 		io.MousePos.y = static_cast<float>(mouseInfo.y);
 		io.MouseDown[0] = mouse.IsDown(static_cast<uint32_t>(MouseButton::LEFT));

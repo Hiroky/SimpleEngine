@@ -7,10 +7,8 @@
 
 namespace se 
 {
-	namespace 
-	{
+	namespace {
 		MouseEventInfo mouseInfo;
-
 
 		//ウインドウプロシージャ
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wp, LPARAM lp)
@@ -19,11 +17,11 @@ namespace se
 			{
 			case WM_MOUSEWHEEL:
 				mouseInfo.wheel += GET_WHEEL_DELTA_WPARAM(wp) > 0 ? 1 : -1;
-				return true;
+				break;
 			case WM_MOUSEMOVE:
 				mouseInfo.x = (int16_t)(lp);
 				mouseInfo.y = (int16_t)(lp >> 16);
-				return true;
+				break;
 
 #if 0
 			case WM_KEYDOWN:
@@ -107,18 +105,15 @@ namespace se
 		}
 	}
 
-
 	void Window::Show()
 	{
 		::ShowWindow(hWnd_, SW_SHOWDEFAULT);
 	}
 
-
 	bool Window::IsActive()
 	{
 		return hWnd_ == ::GetActiveWindow();
 	}
-
 
 	void Window::SetWindowTitle(const wchar_t* name)
 	{

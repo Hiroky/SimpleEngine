@@ -9,7 +9,8 @@ namespace se
 	 */
 	struct MouseEventInfo
 	{
-		uint32_t x, y, wheel;
+		uint32_t x, y;
+		float wheel;
 	};
 
 

@@ -1,12 +1,15 @@
 ﻿#include "se/Graphics/Window.h"
 #include "se/Debug/ImplImgui.h"
 
-struct Vertex
-{
-	se::float3 pos;
-	se::float2 uv;
-};
+namespace {
+	struct Vertex
+	{
+		se::float3 pos;
+		se::float2 uv;
+	};
 
+	se::Texture texture;
+}
 
 void ProcImgui()
 {
@@ -18,7 +21,12 @@ void ProcImgui()
 		ImGui::End();
 		return;
 	}
+
 	ImGui::Text("Dear ImGui says hello.");
+
+	float width = ImGui::GetContentRegionAvailWidth();
+	ImGui::Image(&texture, ImVec2(width, width * ((float)texture.GetHeight() / texture.GetWidth())));
+
 	ImGui::End();
 
 	se::ImGuiRender();
@@ -40,12 +48,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 
 	// 頂点データ
 	Vertex vertex[] = {
-		{ se::float3(-1.0f,  1.0f, 0), se::float2(0.0f, 0.0f)},
-		{ se::float3(-1.0f, -1.0f, 0), se::float2(0.0f, 1.0f)},
-		{ se::float3( 1.0f, -1.0f, 0), se::float2(1.0f, 1.0f)},
-		{ se::float3( 1.0f,  1.0f, 0), se::float2(1.0f, 0.0f)},
+		{ se::float3(-1.0f, 1.0f, 0), se::float2(0.0f, 0.0f) },
+		{ se::float3(-1.0f, -3.0f, 0), se::float2(0.0f, 2.0f) },
+		{ se::float3(3.0f, 1.0f, 0), se::float2(2.0f, 0.0f) },
 	};
-	uint32_t index[] = { 0, 1, 2, 0, 2, 3 };
+	uint32_t index[] = { 0, 1, 2 };
 	se::VertexBuffer vertexBuffer;
 	se::IndexBuffer indexBuffer;
 	vertexBuffer.Create(vertex, sizeof(vertex), se::VERTEX_ATTR_FLAG_POSITION | se::VERTEX_ATTR_FLAG_TEXCOORD0);
@@ -53,7 +60,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	const auto* layout = se::VertexLayoutManager::Get().FindLayout(*quadShader->GetVS(), vertexBuffer.GetAttributes());
 
 	// テクスチャ
-	se::Texture texture;
 	texture.LoadFromFile("texture/test.dds");
 
 	// メインループ
@@ -88,7 +94,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 			context.SetDepthStencilState(se::DepthStencilState::Get(se::DepthStencilState::Disable));
 			context.SetRasterizerState(se::RasterizerState::Get(se::RasterizerState::NoCull));
 			context.SetPrimitiveType(se::PRIMITIVE_TYPE_TRIANGLE_LIST);
-			context.DrawIndexed(0, 6);
+			context.DrawIndexed(0, 3);
 
 			ProcImgui();
 

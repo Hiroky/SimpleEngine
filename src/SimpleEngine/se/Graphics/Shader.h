@@ -81,9 +81,9 @@ namespace se
 		const VertexInputLayout* FindLayout(const VertexShader& shader, uint32_t vertexAttr);
 	};
 
-	//
-	// 頂点シェーダ
-	//
+	/**
+	 * 頂点シェーダ
+	 */
 	class VertexShader
 	{
 		friend GraphicsContext;
@@ -110,9 +110,9 @@ namespace se
 		void CompileFromString(const char* source, int length, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 	};
 
-	//
-	// ピクセルシェーダ
-	//
+	/**
+	 * ピクセルシェーダ
+	 */
 	class PixelShader
 	{
 		friend GraphicsContext;
@@ -132,10 +132,9 @@ namespace se
 		void CompileFromString(const char* source, int length, const char* entryPoint = "main", ShaderReflection* reflection = nullptr);
 	};
 
-
-	//
-	// シェーダセット
-	//
+	/**
+	 * シェーダセット
+	 */
 	class ShaderSet
 	{
 		friend ShaderManager;
@@ -158,8 +157,8 @@ namespace se
 	};
 
 	/**
-	* シェーダ管理
-	*/
+	 * シェーダ管理
+	 */
 	class ShaderManager
 	{
 	public:

@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="se\Graphics\GraphicsCore.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="se\Graphics\Window.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
@@ -17,9 +14,6 @@
     <ClInclude Include="se\Graphics\GraphicsContext.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="se\Graphics\GPUBuffer.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="se\Common.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -30,12 +24,6 @@
       <Filter>src\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="se\Graphics\Shader.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\DDSTextureLoader.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\GraphicsStates.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="se\Graphics\GraphicsCommon.h">
@@ -86,19 +74,25 @@
     <ClInclude Include="se\HID\HIDCore.h">
       <Filter>src\HID</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsStates.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\DDSTextureLoader.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GPUBuffer.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsCore.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="se\Graphics\GraphicsCore.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="se\Graphics\GraphicsContext.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GPUBuffer.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\Material.cpp">
@@ -108,12 +102,6 @@
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\Shader.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GraphicsStates.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
@@ -130,6 +118,18 @@
     </ClCompile>
     <ClCompile Include="se\HID\HIDCore.cpp">
       <Filter>src\HID</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GPUBuffer.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsCore.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsStates.cpp">
+      <Filter>src\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
