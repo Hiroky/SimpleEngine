@@ -73,16 +73,20 @@ namespace se
 	private:
 		uint32_t stride_;
 		uint32_t attributes_;
+		uint32_t size_;
 
 	public:
 		VertexBuffer();
 		virtual ~VertexBuffer();
 
 		void Create(const void* data, uint32_t size, VertexAttributeFlags attributes, BufferUsage usage = BUFFER_USAGE_IMMUTABLE, bool unorderedAccess = false);
+		void Create(uint32_t vertexNum, VertexAttributeFlags attributes, BufferUsage usage = BUFFER_USAGE_IMMUTABLE, bool unorderedAccess = false);
 		virtual void Destroy() override;
 
 		uint32_t GetStride() const { return stride_; }
 		uint32_t GetAttributes() const { return attributes_; }
+		uint32_t GetSize() const { return size_; }
+		uint32_t GetVertexNum() const { return size_ / stride_; }
 	};
 
 	
@@ -100,8 +104,12 @@ namespace se
 		IndexBuffer();
 		virtual ~IndexBuffer();
 
-		void Create(const void* data, uint32_t size, IndexBufferStride stride);
+		void Create(const void* data, uint32_t size, IndexBufferStride stride, BufferUsage usage = BUFFER_USAGE_IMMUTABLE);
+		void Create(uint32_t num, BufferUsage usage = BUFFER_USAGE_IMMUTABLE);
 		virtual void Destroy() override;
+
+		IndexBufferStride GetStride() const { return stride_; }
+		uint32_t GetIndexNum() const { return indexCount_; }
 	};
 
 
@@ -114,7 +122,7 @@ namespace se
 		uint32_t width_;
 		uint32_t height_;
 		uint32_t depth_;
-		uint32_t format_;	// TODO:フォーマットEnum定義
+		Format format_;
 
 	public:
 		PixelBuffer();
@@ -143,7 +151,7 @@ namespace se
 		ColorBuffer();
 		virtual ~ColorBuffer();
 
-		void Create2D(DXGI_FORMAT format, uint32_t width, uint32_t height, uint32_t arraySize = 1u, uint32_t mips = 1u);
+		void Create2D(Format format, uint32_t width, uint32_t height, uint32_t arraySize = 1u, uint32_t mips = 1u);
 		// TODO:各種初期化対応
 		//void Initialize3D();
 		//void InitializeCube();
@@ -186,6 +194,17 @@ namespace se
 		void LoadFromMemory(const void* data, uint32_t size);
 	};
 
+	/**
+	 * CPUからアクセス可能なリソース
+	 */
+	class ProceduralTexture : public PixelBuffer
+	{
+	public:
+		ProceduralTexture();
+		virtual ~ProceduralTexture();
+
+		void Create(const void* data, uint32_t width, uint32_t height, Format format, uint32_t bpp);
+	};
 
 	/**
 	 * ユニフォームパラメータ

@@ -150,6 +150,8 @@ namespace se
 
 		VertexShader* GetVS() { return &vs_; }
 		PixelShader* GetPS() { return &ps_; }
+		const VertexShader* GetVS() const { return &vs_; }
+		const PixelShader* GetPS() const { return &ps_; }
 
 		void VSCompileFromString(const char* source, int length, const char* entryPoint = "main");
 		void PSCompileFromString(const char* source, int length, const char* entryPoint = "main");

@@ -18,16 +18,22 @@ namespace se
 		static ColorBuffer				displayBuffer_;
 		static DepthStencilBuffer		displayDepthBuffer_;
 
+		static uint32_t width_;
+		static uint32_t height_;
+
 	public:
 		static void Initialize();
 		static void Finalize();
 
 		static ID3D11Device* GetDevice() { return device_; }
-		static GraphicsContext* GetImmediateContext() { return &immediateContext_; }
+		static GraphicsContext& GetImmediateContext() { return immediateContext_; }
 
 		static void Present(uint32_t syncInterval, uint32_t flags);
 
 		static const ColorBuffer& GetDisplayColorBuffer() { return displayBuffer_; }
 		static const DepthStencilBuffer& GetDisplayDepthStencilBuffer() { return displayDepthBuffer_; }
+
+		static uint32_t GetDisplayWidth() { return width_; }
+		static uint32_t GetDisplayHeight() { return height_; }
 	};
 }

@@ -110,6 +110,8 @@ namespace se
 		static const char* inputSemantics[] = {
 			"POSITION",
 			"NORMAL",
+			"COLOR",
+			"BYTECOLOR",
 			"TEXCOORD",
 			"TANGENT",
 			"BITANGENT",
@@ -117,6 +119,8 @@ namespace se
 		static const VertexAttributeFlags inputAttribute[] = {
 			VERTEX_ATTR_FLAG_POSITION,
 			VERTEX_ATTR_FLAG_NORMAL,
+			VERTEX_ATTR_FLAG_COLOR,
+			VERTEX_ATTR_FLAG_BYTE_COLOR,
 			VERTEX_ATTR_FLAG_TEXCOORD0,
 			VERTEX_ATTR_FLAG_TANGENT,
 			VERTEX_ATTR_FLAG_BITANGENT,
@@ -128,7 +132,7 @@ namespace se
 		for (uint32_t i = 0; i < shader_desc.InputParameters; i++) {
 			D3D11_SIGNATURE_PARAMETER_DESC param_desc;
 			reflection_->GetInputParameterDesc(i, &param_desc);
-			for (uint32_t j = 0; j < arraySize(inputSemantics); j++) {
+			for (uint32_t j = 0; j < ArraySize(inputSemantics); j++) {
 				if (strcmp(inputSemantics[j], param_desc.SemanticName) == 0) {
 					attr |= inputAttribute[j];
 					break;
@@ -245,6 +249,12 @@ namespace se
 			D3D11_INPUT_ELEMENT_DESC t = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
 			desc[count] = t;
 			offset += 16;
+			count++;
+		}
+		if (vertexAttr & VERTEX_ATTR_FLAG_BYTE_COLOR) {
+			D3D11_INPUT_ELEMENT_DESC t = { "BYTECOLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, offset, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+			desc[count] = t;
+			offset += 4;
 			count++;
 		}
 		if (vertexAttr & VERTEX_ATTR_FLAG_TEXCOORD0) {

@@ -60,6 +60,11 @@ namespace se
 		deviceContext_->PSSetShader(shader.Get(), nullptr, 0);
 	}
 
+	void GraphicsContext::SetBlendState(const BlendState& blend)
+	{
+		deviceContext_->OMSetBlendState(blend.state_, 0, 0xFFFFFFFF);
+	}
+
 	void GraphicsContext::SetDepthStencilState(const DepthStencilState& depthStencil)
 	{
 		deviceContext_->OMSetDepthStencilState(depthStencil.state_, 0);
@@ -97,6 +102,20 @@ namespace se
 		deviceContext_->RSSetScissorRects(1, &r);
 	}
 
+	void GraphicsContext::SetViewportAndScissorRect(const Rect& rect, float minDepth, float maxDepth)
+	{
+		D3D11_VIEWPORT vp;
+		vp.TopLeftX = static_cast<float>(rect.x);
+		vp.TopLeftY = static_cast<float>(rect.y);
+		vp.Width = static_cast<float>(rect.width);
+		vp.Height = static_cast<float>(rect.height);
+		vp.MinDepth = minDepth;
+		vp.MaxDepth = maxDepth;
+		deviceContext_->RSSetViewports(1, &vp);
+		D3D11_RECT r = { rect.x, rect.y, rect.width, rect.height };
+		deviceContext_->RSSetScissorRects(1, &r);
+	}
+
 	void GraphicsContext::SetInputLayout(const VertexInputLayout& layout)
 	{
 		deviceContext_->IASetInputLayout(layout.layout);
@@ -112,7 +131,8 @@ namespace se
 
 	void GraphicsContext::SetIndexBuffer(const IndexBuffer* ib)
 	{
-		deviceContext_->IASetIndexBuffer(ib->Get<ID3D11Buffer>(), DXGI_FORMAT_R32_UINT, 0);
+		static DXGI_FORMAT indexFormat[] = { DXGI_FORMAT_R16_UINT, DXGI_FORMAT_R32_UINT };
+		deviceContext_->IASetIndexBuffer(ib->Get<ID3D11Buffer>(), indexFormat[ib->GetStride()], 0);
 	}
 
 	void GraphicsContext::SetVSResource(uint32_t slot, const GPUResource* resource)
@@ -132,9 +152,36 @@ namespace se
 		deviceContext_->PSSetSamplers(slot, 1, &sampler.state_);
 	}
 
-	void GraphicsContext::DrawIndexed(uint32_t indexStart, uint32_t indexCount)
+	void GraphicsContext::SetVSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer)
 	{
-		deviceContext_->DrawIndexed(indexCount, indexStart, 0);
+		deviceContext_->VSSetConstantBuffers(slot, 1, &buffer.buffer_);
+	}
+
+	void GraphicsContext::SetPSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer)
+	{
+		deviceContext_->PSSetConstantBuffers(slot, 1, &buffer.buffer_);
+	}
+
+	void GraphicsContext::SetCSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer)
+	{
+		deviceContext_->CSSetConstantBuffers(slot, 1, &buffer.buffer_);
+	}
+
+	void GraphicsContext::DrawIndexed(uint32_t indexStart, uint32_t indexCount, uint32_t vertexStart)
+	{
+		deviceContext_->DrawIndexed(indexCount, indexStart, vertexStart);
+	}
+
+	void * GraphicsContext::Map(GPUResource& resource, uint32_t subResource)
+	{
+		D3D11_MAPPED_SUBRESOURCE mapResource;
+		THROW_IF_FAILED(deviceContext_->Map(resource.GetResource(), subResource, D3D11_MAP_WRITE_DISCARD, 0 , &mapResource));
+		return mapResource.pData;
+	}
+
+	void GraphicsContext::Unmap(GPUResource& resource, uint32_t subResource)
+	{
+		deviceContext_->Unmap(resource.GetResource(), subResource);
 	}
 
 	void GraphicsContext::UpdateSubresource(ConstantBuffer& resource, const void* data, size_t size)

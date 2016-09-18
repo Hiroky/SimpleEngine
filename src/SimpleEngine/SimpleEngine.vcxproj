@@ -184,6 +184,7 @@
     <ClInclude Include="se\async\Async.h" />
     <ClInclude Include="se\async\Atomic.h" />
     <ClInclude Include="se\async\Threading.h" />
+    <ClInclude Include="se\Debug\ImplImgui.h" />
     <ClInclude Include="se\engine.h" />
     <ClInclude Include="se\Graphics\DDSTextureLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -230,11 +231,20 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="se\Common.h" />
+    <ClInclude Include="se\HID\HIDCore.h" />
+    <ClInclude Include="se\HID\Mouse.h" />
     <ClInclude Include="se\Math\Math.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="thirdparty\imgui\imconfig.h" />
+    <ClInclude Include="thirdparty\imgui\imgui.h" />
+    <ClInclude Include="thirdparty\imgui\imgui_internal.h" />
+    <ClInclude Include="thirdparty\imgui\stb_rect_pack.h" />
+    <ClInclude Include="thirdparty\imgui\stb_textedit.h" />
+    <ClInclude Include="thirdparty\imgui\stb_truetype.h" />
     <ClInclude Include="thirdparty\picojson\picojson.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="se\Debug\ImplImgui.cpp" />
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -268,12 +278,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="se\HID\HIDCore.cpp" />
+    <ClCompile Include="se\HID\Mouse.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui.cpp" />
+    <ClCompile Include="thirdparty\imgui\imgui_draw.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

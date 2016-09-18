@@ -9,11 +9,38 @@ namespace se
 {
 	namespace 
 	{
+		MouseEventInfo mouseInfo;
+
+
 		//ウインドウプロシージャ
 		LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wp, LPARAM lp)
 		{
 			switch (uMsg) 
 			{
+			case WM_MOUSEWHEEL:
+				mouseInfo.wheel += GET_WHEEL_DELTA_WPARAM(wp) > 0 ? 1 : -1;
+				return true;
+			case WM_MOUSEMOVE:
+				mouseInfo.x = (int16_t)(lp);
+				mouseInfo.y = (int16_t)(lp >> 16);
+				return true;
+
+#if 0
+			case WM_KEYDOWN:
+				if (wp < 256)
+					io.KeysDown[wp] = 1;
+				return true;
+			case WM_KEYUP:
+				if (wp < 256)
+					io.KeysDown[wp] = 0;
+				return true;
+			case WM_CHAR:
+				// You can also use ToAscii()+GetKeyboardState() to retrieve characters.
+				if (wp > 0 && wp < 0x10000)
+					io.AddInputCharacter((unsigned short)wp);
+				return true;
+#endif
+
 			case WM_DESTROY:
 				::PostQuitMessage(0);
 				break;
@@ -27,12 +54,14 @@ namespace se
 	}
 
 
-	HINSTANCE Window::hInst_;		// インスタンスハンドル
-	HWND Window::hWnd_;				// ウィンドウハンドル
+	HINSTANCE Window::hInst_;
+	HWND Window::hWnd_;
 
 
 	void Window::Initialize(HINSTANCE hInst, int width, int height, const wchar_t* title)
 	{
+		ZeroMemory(&mouseInfo, sizeof(mouseInfo));
+
 		// 拡張ウィンドウクラスの登録
 		WNDCLASSEX wc;
 		wc.cbSize = sizeof(WNDCLASSEX);
@@ -112,6 +141,16 @@ namespace se
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+	}
+
+	const MouseEventInfo& Window::GetMouseEventInfo()
+	{
+		return mouseInfo;
+	}
+
+	void Window::ResetMouseEventInfo()
+	{
+		mouseInfo.wheel = 0;
 	}
 
 }

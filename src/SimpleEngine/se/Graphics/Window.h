@@ -1,18 +1,26 @@
 ﻿#pragma once
 
 #include <windows.h>
-#include <d3d11.h>
 
 namespace se
 {
-	//
-	//	アプリケーションウインドウ
-	//
+	/**
+	 *	マウスイベント情報
+	 */
+	struct MouseEventInfo
+	{
+		uint32_t x, y, wheel;
+	};
+
+
+	/**
+	 *	アプリケーションウインドウ
+	 */
 	class Window
 	{
 	private:
-		static HINSTANCE				hInst_;				// インスタンスハンドル
-		static HWND						hWnd_;					// ウィンドウハンドル
+		static HINSTANCE				hInst_;
+		static HWND						hWnd_;
 
 	public:
 		static void Initialize(HINSTANCE hInst, int width, int height, const wchar_t* title);
@@ -24,6 +32,8 @@ namespace se
 		static void MessageLoop(MSG msg);
 
 		static HWND GetHWND() { return hWnd_; }
+		static const MouseEventInfo& GetMouseEventInfo();
+		static void ResetMouseEventInfo();
 	};
 
 }

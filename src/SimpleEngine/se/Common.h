@@ -11,7 +11,7 @@
 #include <algorithm>
 
 // マクロ
-#define arraySize(p)		(sizeof (p) /sizeof p[0])
+#define ArraySize(p)		(sizeof (p) /sizeof p[0])
 
 #ifdef _DEBUG
 

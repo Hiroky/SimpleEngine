@@ -224,4 +224,114 @@ namespace se
 
 #pragma endregion
 
+#pragma region BlendState
+
+	namespace {
+		void SetRenderTargetBlendDesc(D3D11_RENDER_TARGET_BLEND_DESC* desc, BlendState::BlendType type, uint8_t color_mask = D3D11_COLOR_WRITE_ENABLE_ALL)
+		{
+			D3D11_RENDER_TARGET_BLEND_DESC& ref = *desc;
+
+			switch (type)
+			{
+			case BlendState::Opaque:
+				ref.BlendEnable = FALSE;
+				ref.SrcBlend = D3D11_BLEND_ONE;
+				ref.DestBlend = D3D11_BLEND_ZERO;
+				ref.BlendOp = D3D11_BLEND_OP_ADD;
+				ref.SrcBlendAlpha = D3D11_BLEND_ONE;
+				ref.DestBlendAlpha = D3D11_BLEND_ZERO;
+				ref.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+				ref.RenderTargetWriteMask = color_mask;
+				break;
+
+			case BlendState::Translucent:
+				ref.BlendEnable = TRUE;
+				ref.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+				ref.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+				ref.BlendOp = D3D11_BLEND_OP_ADD;
+				ref.SrcBlendAlpha = D3D11_BLEND_ONE;
+				ref.DestBlendAlpha = D3D11_BLEND_ZERO;
+				ref.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+				ref.RenderTargetWriteMask = color_mask;
+				break;
+
+			case BlendState::Additive:
+				ref.BlendEnable = TRUE;
+				ref.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+				ref.DestBlend = D3D11_BLEND_ONE;
+				ref.BlendOp = D3D11_BLEND_OP_ADD;
+				ref.SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+				ref.DestBlendAlpha = D3D11_BLEND_ONE;
+				ref.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+				ref.RenderTargetWriteMask = color_mask;
+				break;
+
+			case BlendState::Modulate:
+				ref.BlendEnable = TRUE;
+				ref.SrcBlend = D3D11_BLEND_ZERO;
+				ref.DestBlend = D3D11_BLEND_SRC_COLOR;
+				ref.BlendOp = D3D11_BLEND_OP_ADD;
+				ref.SrcBlendAlpha = D3D11_BLEND_ONE;
+				ref.DestBlendAlpha = D3D11_BLEND_ZERO;
+				ref.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+				ref.RenderTargetWriteMask = color_mask;
+				break;
+
+			case BlendState::Subtruct:
+				ref.BlendEnable = TRUE;
+				ref.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+				ref.DestBlend = D3D11_BLEND_ONE;
+				ref.BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
+				ref.SrcBlendAlpha = D3D11_BLEND_ONE;
+				ref.DestBlendAlpha = D3D11_BLEND_ZERO;
+				ref.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+				ref.RenderTargetWriteMask = color_mask;
+				break;
+			}
+		}
+	}
+
+	BlendState BlendState::templates_[BlendTypeNum];
+
+	void BlendState::Initialize()
+	{
+		for (int32_t i = 0; i < BlendTypeNum; i++) {
+			templates_[i].Create(static_cast<BlendType>(i));
+		}
+	}
+
+	void BlendState::Finalize()
+	{
+		for (int32_t i = 0; i < BlendTypeNum; i++) {
+			templates_[i].Destroy();
+		}
+	}
+
+	BlendState::BlendState()
+		: state_(nullptr)
+	{
+	}
+
+	BlendState::~BlendState()
+	{
+		COMPTR_RELEASE(state_);
+	}
+
+	void BlendState::Create(BlendType type)
+	{
+		D3D11_BLEND_DESC blendState;
+		memset(&blendState, 0, sizeof(D3D11_BLEND_DESC));
+		blendState.AlphaToCoverageEnable = FALSE;
+		blendState.IndependentBlendEnable = TRUE;
+		SetRenderTargetBlendDesc(&blendState.RenderTarget[0], type, D3D11_COLOR_WRITE_ENABLE_ALL);
+		THROW_IF_FAILED(GraphicsCore::GetDevice()->CreateBlendState(&blendState, &state_));
+	}
+
+	void BlendState::Destroy()
+	{
+		COMPTR_RELEASE(state_);
+	}
+
+#pragma endregion
+
 }

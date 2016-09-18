@@ -59,6 +59,33 @@
     <ClInclude Include="C:\Users\Hiroki Morishita\Desktop\tinyobjloader-master\tiny_obj_loader.h">
       <Filter>thirdparty\tinyobjloader</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\imgui\imgui_internal.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\stb_rect_pack.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\stb_textedit.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\stb_truetype.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\imconfig.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\imgui\imgui.h">
+      <Filter>thirdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Debug\ImplImgui.h">
+      <Filter>src\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="se\HID\Mouse.h">
+      <Filter>src\HID</Filter>
+    </ClInclude>
+    <ClInclude Include="se\HID\HIDCore.h">
+      <Filter>src\HID</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -89,6 +116,21 @@
     <ClCompile Include="se\Graphics\GraphicsStates.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
+      <Filter>thirdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\imgui\imgui.cpp">
+      <Filter>thirdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Debug\ImplImgui.cpp">
+      <Filter>src\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="se\HID\Mouse.cpp">
+      <Filter>src\HID</Filter>
+    </ClCompile>
+    <ClCompile Include="se\HID\HIDCore.cpp">
+      <Filter>src\HID</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -111,6 +153,15 @@
     </Filter>
     <Filter Include="thirdparty\tinyobjloader">
       <UniqueIdentifier>{15e157f2-4ab6-48d1-a966-6426dc47ed4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\imgui">
+      <UniqueIdentifier>{c9837afe-f63d-44e9-9b0d-e01f017bfaf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Debug">
+      <UniqueIdentifier>{0d0bb1d0-1ed3-4ffe-8227-0191cb96fa41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\HID">
+      <UniqueIdentifier>{8d0e3912-3472-4b06-92ae-c7947562e068}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -108,7 +108,41 @@ namespace se
 	};
 
 
+	/**
+	 * ブレンドステート
+	 */
 	class BlendState
 	{
+		friend class GraphicsContext;
+
+	public:
+		enum BlendType
+		{
+			Opaque,
+			Translucent,
+			Additive,
+			Modulate,
+			Subtruct,
+		};
+		static const int32_t BlendTypeNum = Subtruct + 1;
+
+	private:
+		static BlendState templates_[BlendTypeNum];
+
+	public:
+		static void Initialize();
+		static void Finalize();
+		static const BlendState& Get(BlendType type) { return templates_[type]; };
+
+	private:
+		ID3D11BlendState* state_;
+
+	private:
+		BlendState();
+		~BlendState();
+		BlendState(const BlendState&);	// コピー禁止
+
+		void Create(BlendType type);
+		void Destroy();
 	};
 }

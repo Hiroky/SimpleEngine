@@ -12,6 +12,8 @@ namespace se
 	GraphicsContext			GraphicsCore::immediateContext_;
 	ColorBuffer				GraphicsCore::displayBuffer_;
 	DepthStencilBuffer		GraphicsCore::displayDepthBuffer_;
+	uint32_t				GraphicsCore::width_;
+	uint32_t				GraphicsCore::height_;
 
 	void GraphicsCore::Initialize()
 	{
@@ -21,8 +23,8 @@ namespace se
 		// ウィンドウサイズを取得
 		RECT rc;
 		GetClientRect(hWnd, &rc);
-		UINT width = rc.right - rc.left;
-		UINT height = rc.bottom - rc.top;
+		width_ = rc.right - rc.left;
+		height_ = rc.bottom - rc.top;
 
 		UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -47,8 +49,8 @@ namespace se
 		DXGI_SWAP_CHAIN_DESC sd;
 		ZeroMemory(&sd, sizeof(sd));
 		sd.BufferCount = 1;
-		sd.BufferDesc.Width = width;
-		sd.BufferDesc.Height = height;
+		sd.BufferDesc.Width = width_;
+		sd.BufferDesc.Height = height_;
 		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		sd.BufferDesc.RefreshRate.Numerator = 60;
 		sd.BufferDesc.RefreshRate.Denominator = 1;
@@ -98,7 +100,7 @@ namespace se
 		displayBuffer_.InitializeDisplayBuffer(renderTargetView);
 
 		// デプスステンシルテクスチャ生成
-		displayDepthBuffer_.Create(width, height);
+		displayDepthBuffer_.Create(width_, height_);
 
 		//設定
 		deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -108,25 +110,14 @@ namespace se
 
 		// ステート
 		SamplerState::Initialize();
+		BlendState::Initialize();
 		DepthStencilState::Initialize();
 		RasterizerState::Initialize();
-		immediateContext_.SetDepthStencilState(DepthStencilState::Get(DepthStencilState::Disable));
 		immediateContext_.SetRasterizerState(RasterizerState::Get(RasterizerState::BackFaceCull));
 
-		// 仮
-		D3D11_VIEWPORT vp;
-		vp.Width = static_cast<float>(width);
-		vp.Height = static_cast<float>(height);
-		vp.MinDepth = 0.0f;
-		vp.MaxDepth = 1.0f;
-		vp.TopLeftX = 0;
-		vp.TopLeftY = 0;
-		deviceContext->RSSetViewports(1, &vp);
-		D3D11_RECT rect;
-		rect.top = rect.left = 0;
-		rect.right = width;
-		rect.bottom = height;
-		deviceContext->RSSetScissorRects(1, &rect);
+		// ビューポート
+		Rect rect(0, 0, width_, height_);
+		immediateContext_.SetViewportAndScissorRect(Rect(0, 0, width_, height_));
 
 		VertexLayoutManager::Get().Initialize();
 	}

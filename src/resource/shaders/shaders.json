@@ -22,5 +22,11 @@
 		"FileName": "FXAA.fx",
 		"VSEntry": "FxaaVS",
 		"PSEntry": "FxaaPS"
+	},
+	{
+		"Name": "RenderImgui",
+		"FileName": "Imgui.fx",
+		"VSEntry": "mainVS",
+		"PSEntry": "mainPS"
 	}
 ]
