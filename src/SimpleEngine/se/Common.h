@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <array>
 #include <algorithm>
+#include <memory>
 
 // マクロ
 #define ArraySize(p)		(sizeof (p) /sizeof p[0])

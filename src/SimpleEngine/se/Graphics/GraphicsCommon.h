@@ -4,7 +4,7 @@
 #include <d3d11.h>
 
 #ifndef COMPTR_RELEASE
-	#define COMPTR_RELEASE(p)		if(p) { p->Release(); p = nullptr; }
+	#define COMPTR_RELEASE(p)	if(p) { p->Release(); p = nullptr; }
 #endif
 
 #ifndef THROW_IF_FAILED
@@ -32,6 +32,7 @@ namespace se
 
 		VERTEX_ATTR_UNKNOWN,
 	};
+
 	enum VertexAttributeFlag
 	{
 		VERTEX_ATTR_FLAG_POSITION = 1 << VERTEX_ATTR_POSITION,
@@ -57,7 +58,6 @@ namespace se
 
 		PRIMITIVE_TYPE_UNKNOWN,
 	};
-
 
 	/**
 	 * フォーマット
@@ -165,5 +165,25 @@ namespace se
 		FORMAT_BC7_UNORM,
 		FORMAT_BC7_UNORM_SRGB,
 	};
+
+
+	/**
+	 * 頂点バッファのストライドを算出
+	 */
+	inline uint32_t ComputeVertexStride(uint32_t attr)
+	{
+		uint32_t size = 0;
+		if (attr & VERTEX_ATTR_FLAG_POSITION) size += 12;
+		if (attr & VERTEX_ATTR_FLAG_NORMAL) size += 12;
+		if (attr & VERTEX_ATTR_FLAG_COLOR) size += 16;
+		if (attr & VERTEX_ATTR_FLAG_BYTE_COLOR) size += 4;
+		if (attr & VERTEX_ATTR_FLAG_TEXCOORD0) size += 8;
+		if (attr & VERTEX_ATTR_FLAG_TEXCOORD1) size += 8;
+		if (attr & VERTEX_ATTR_FLAG_TEXCOORD2) size += 8;
+		if (attr & VERTEX_ATTR_FLAG_TEXCOORD3) size += 8;
+		if (attr & VERTEX_ATTR_FLAG_TANGENT) size += 12;
+		if (attr & VERTEX_ATTR_FLAG_BITANGENT) size += 12;
+		return size;
+	}
 
 }

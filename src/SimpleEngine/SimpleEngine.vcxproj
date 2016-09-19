@@ -186,6 +186,7 @@
     <ClInclude Include="se\async\Threading.h" />
     <ClInclude Include="se\Debug\ImplImgui.h" />
     <ClInclude Include="se\engine.h" />
+    <ClInclude Include="se\Graphics\Camera.h" />
     <ClInclude Include="se\Graphics\DDSTextureLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -196,10 +197,6 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="se\Graphics\GraphicsStates.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\MeshResource.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClInclude>
@@ -219,14 +216,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="se\Graphics\Material.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="se\Graphics\Shader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="se\Graphics\StaticMesh.h" />
+    <ClInclude Include="se\Graphics\Uniforms.h" />
     <ClInclude Include="se\Graphics\Window.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -246,16 +241,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Debug\ImplImgui.cpp" />
+    <ClCompile Include="se\Graphics\Camera.cpp" />
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="se\Graphics\GPUProfiler.cpp" />
     <ClCompile Include="se\Graphics\GraphicsStates.cpp" />
-    <ClCompile Include="se\Graphics\MeshResource.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="se\Graphics\GPUBuffer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
@@ -268,14 +260,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="se\Graphics\Material.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="se\Graphics\Shader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="se\Graphics\StaticMesh.cpp" />
     <ClCompile Include="se\Graphics\Window.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

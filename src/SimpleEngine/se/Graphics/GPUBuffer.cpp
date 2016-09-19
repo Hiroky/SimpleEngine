@@ -187,25 +187,6 @@ namespace se
 
 #pragma region VertexBuffer
 
-	namespace
-	{
-		uint32_t ComputeVertexStride(uint32_t attr)
-		{
-			uint32_t size = 0;
-			if (attr & VERTEX_ATTR_FLAG_POSITION) size += 12;
-			if (attr & VERTEX_ATTR_FLAG_NORMAL) size += 12;
-			if (attr & VERTEX_ATTR_FLAG_COLOR) size += 16;
-			if (attr & VERTEX_ATTR_FLAG_BYTE_COLOR) size += 4;
-			if (attr & VERTEX_ATTR_FLAG_TEXCOORD0) size += 8;
-			if (attr & VERTEX_ATTR_FLAG_TEXCOORD1) size += 8;
-			if (attr & VERTEX_ATTR_FLAG_TEXCOORD2) size += 8;
-			if (attr & VERTEX_ATTR_FLAG_TEXCOORD3) size += 8;
-			if (attr & VERTEX_ATTR_FLAG_TANGENT) size += 12;
-			if (attr & VERTEX_ATTR_FLAG_BITANGENT) size += 12;
-			return size;
-		}
-	}
-
 	VertexBuffer::VertexBuffer()
 		: stride_(0)
 		, attributes_(0)

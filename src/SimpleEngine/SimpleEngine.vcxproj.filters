@@ -17,12 +17,6 @@
     <ClInclude Include="se\Common.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="se\Graphics\Material.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\MeshResource.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="se\Graphics\Shader.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
@@ -89,6 +83,15 @@
     <ClInclude Include="se\Graphics\GPUProfiler.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\StaticMesh.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\Camera.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\Uniforms.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -96,12 +99,6 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="se\Graphics\GraphicsContext.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\Material.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\MeshResource.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\Shader.cpp">
@@ -135,6 +132,12 @@
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\GPUProfiler.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\StaticMesh.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\Camera.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

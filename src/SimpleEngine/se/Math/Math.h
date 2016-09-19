@@ -60,6 +60,8 @@ namespace se
 			return result;
 		}
 
+		FXMVECTOR ToSIMD() const { return XMLoadFloat2(this); }
+
 		float* ToFloatArray() { return reinterpret_cast<float*>(this); }
 		const float* ToFloatArray() const { return reinterpret_cast<const float*>(this); }
 	};
@@ -119,6 +121,8 @@ namespace se
 			return result;
 		}
 
+		FXMVECTOR ToSIMD() const { return XMLoadFloat3(this); }
+
 		float* ToFloatArray() { return reinterpret_cast<float*>(this); }
 		const float* ToFloatArray() const { return reinterpret_cast<const float*>(this); }
 	};
@@ -155,6 +159,8 @@ namespace se
 			XMStoreFloat4(this, v);
 		}
 
+		FXMVECTOR ToSIMD() const { return XMLoadFloat4(this); }
+
 		float* ToFloatArray() { return reinterpret_cast<float*>(this); }
 		const float* ToFloatArray() const { return reinterpret_cast<const float*>(this); }
 	};
@@ -180,13 +186,13 @@ namespace se
 
 		Matrix44& operator*=(const Matrix44& other)
 		{
-			auto result = ToMatrix() * other.ToMatrix();
+			auto result = ToSIMD() * other.ToSIMD();
 			XMStoreFloat4x4(this, result);
 			return *this;
 		}
 		Matrix44 operator*(const Matrix44& other) const
 		{
-			auto result = ToMatrix() * other.ToMatrix();
+			auto result = ToSIMD() * other.ToSIMD();
 			return Matrix44(result);
 		}
 
@@ -223,18 +229,18 @@ namespace se
 			_43 = t.z;
 		}
 
-		XMMATRIX ToMatrix() const { return XMLoadFloat4x4(this); }
+		XMMATRIX ToSIMD() const { return XMLoadFloat4x4(this); }
 
 		/* static methods */
 		static Matrix44 Transpose(const Matrix44& m)
 		{
-			return XMMatrixTranspose(m.ToMatrix());
+			return XMMatrixTranspose(m.ToSIMD());
 		}
 
 		static Matrix44 Invert(const Matrix44& m)
 		{
 			XMVECTOR det;
-			return XMMatrixInverse(&det, m.ToMatrix());
+			return XMMatrixInverse(&det, m.ToSIMD());
 		}
 
 		static Matrix44 ScaleMatrix(float s)
@@ -323,4 +329,15 @@ namespace se
 		else if (val > max) val = max;
 		return val;
 	}
+
+	__forceinline float DegreeToRadian(float deg)
+	{
+		return deg * (1.0f / 180.0f) * 3.14159265359f;
+	}
+
+	__forceinline float RadianToDegree(float rad)
+	{
+		return rad * (1.0f / 3.14159265359f) * 180.0f;
+	}
+
 }
