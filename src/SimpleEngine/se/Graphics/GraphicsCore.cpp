@@ -2,6 +2,7 @@
 #include "se/Graphics/Window.h"
 #include "se/Graphics/Shader.h"
 #include "se/Graphics/GraphicsStates.h"
+#include "se/Graphics/GPUProfiler.h"
 
 namespace se
 {
@@ -116,12 +117,16 @@ namespace se
 
 		// 頂点レイアウトマネージャ
 		VertexLayoutManager::Get().Initialize();
+
+		// プロファイラ
+		GPUProfiler::Get().Initialize();
 	}
 
 
 	void GraphicsCore::Finalize()
 	{
 		VertexLayoutManager::Get().Finalize();
+		GPUProfiler::Get().Finalize();
 
 		immediateContext_.Finalize();
 		COMPTR_RELEASE(swapChain_);

@@ -189,4 +189,19 @@ namespace se
 		deviceContext_->UpdateSubresource(resource.buffer_, 0, nullptr, data, 0, 0);
 	}
 
+	void GraphicsContext::BeginQuery(Query& query)
+	{
+		deviceContext_->Begin(query.query_);
+	}
+
+	void GraphicsContext::EndQuery(Query& query)
+	{
+		deviceContext_->End(query.query_);
+	}
+
+	void GraphicsContext::GetQueryData(Query& query, void* data, uint32_t size)
+	{
+		deviceContext_->GetData(query.query_, data, size, 0);
+	}
+
 }

@@ -10,3 +10,4 @@
 #include "se/Graphics/GraphicsStates.h"
 #include "se/Graphics/GPUBuffer.h"
 #include "se/Graphics/Shader.h"
+#include "se/Graphics/GPUProfiler.h"

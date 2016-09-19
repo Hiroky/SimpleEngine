@@ -175,12 +175,6 @@ namespace se {
 		g_shader = ShaderManager::Get().Find("RenderImgui");
 		Assert(g_shader);
 
-		// Build texture atlas
-		unsigned char* pixels;
-		int width, height;
-		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-		fontTexture.Create(pixels, width, height, FORMAT_R8G8B8A8_UNORM, 4);
-		io.Fonts->TexID = (void*)&fontTexture;
 
 		return true;
 	}
@@ -201,6 +195,15 @@ namespace se {
 	void ImGuiNewFrame()
 	{
 		ImGuiIO& io = ImGui::GetIO();
+
+		// フォント生成
+		if (!fontTexture.GetResource()) {
+			unsigned char* pixels;
+			int width, height;
+			io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+			fontTexture.Create(pixels, width, height, FORMAT_R8G8B8A8_UNORM, 4);
+			io.Fonts->TexID = (void*)&fontTexture;
+		}
 
 		// Setup display size (every frame to accommodate for window resizing)
 		io.DisplaySize = ImVec2((float)GraphicsCore::GetDisplayWidth(), (float)GraphicsCore::GetDisplayHeight());
@@ -237,6 +240,15 @@ namespace se {
 	void ImGuiRender()
 	{
 		ImGui::Render();
+	}
+
+
+	/**
+	 * フォント追加
+	 */
+	void ImGuiAddFontFromFileTTF(const char* filename, float sizePixels)
+	{
+		ImGui::GetIO().Fonts->AddFontFromFileTTF(filename, sizePixels);
 	}
 
 }

@@ -15,6 +15,9 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <vector>
+#include <stack>
+#include <queue>
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください

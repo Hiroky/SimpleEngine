@@ -14,6 +14,7 @@ namespace se
 	class IndexBuffer;
 	class ColorBuffer;
 	class DepthStencilBuffer;
+	class Query;
 	class SamplerState;
 	class BlendState;
 	class DepthStencilState;
@@ -72,5 +73,10 @@ namespace se
 		void* Map(GPUResource& resource, uint32_t subResource = 0);
 		void Unmap(GPUResource& resource, uint32_t subResource = 0);
 		void UpdateSubresource(ConstantBuffer& resource, const void* data, size_t size);
+
+		// Query
+		void BeginQuery(Query& query);
+		void EndQuery(Query& query);
+		void GetQueryData(Query& query, void* data, uint32_t size);
 	};
 }

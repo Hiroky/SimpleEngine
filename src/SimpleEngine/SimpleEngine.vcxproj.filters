@@ -86,6 +86,9 @@
     <ClInclude Include="se\Graphics\GraphicsCore.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\GPUProfiler.h">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
@@ -129,6 +132,9 @@
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\GraphicsStates.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GPUProfiler.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

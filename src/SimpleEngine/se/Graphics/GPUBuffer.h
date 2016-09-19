@@ -194,6 +194,7 @@ namespace se
 		void LoadFromMemory(const void* data, uint32_t size);
 	};
 
+
 	/**
 	 * CPUからアクセス可能なリソース
 	 */
@@ -205,6 +206,36 @@ namespace se
 
 		void Create(const void* data, uint32_t width, uint32_t height, Format format, uint32_t bpp);
 	};
+
+
+	/**
+	* クエリ
+	*/
+	class Query
+	{
+		friend class GraphicsContext;
+
+	public:
+		enum Type {
+			TIMESTAMP,
+			TIMESTAMP_DISJOINT,
+
+			UNKNOWN
+		};
+
+	private:
+		ID3D11Query* query_;
+		Type type_;
+
+	public:
+		Query();
+		~Query();
+
+		void Create(Type type);
+		void Destroy();
+		bool IsCreated() const { return query_ != nullptr; }
+	};
+
 
 	/**
 	 * ユニフォームパラメータ

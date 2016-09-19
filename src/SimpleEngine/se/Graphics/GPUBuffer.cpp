@@ -551,7 +551,7 @@ namespace se
 
 #pragma endregion
 
-#pragma region Texture
+#pragma region ProceduralTexture
 
 	ProceduralTexture::ProceduralTexture()
 	{
@@ -606,6 +606,39 @@ namespace se
 		THROW_IF_FAILED(device->CreateShaderResourceView(texture, &srvDesc, &srv_));
 	}
 
+
+#pragma endregion
+
+#pragma region Query
+
+	Query::Query()
+		: query_(nullptr)
+		, type_(UNKNOWN)
+	{
+	}
+
+	Query::~Query()
+	{
+		COMPTR_RELEASE(query_);
+	}
+
+	void Query::Create(Type type)
+	{
+		static D3D11_QUERY types[] = { D3D11_QUERY_TIMESTAMP, D3D11_QUERY_TIMESTAMP_DISJOINT };
+		Assert(type < UNKNOWN);
+
+		type_ = type;
+		auto* device = GraphicsCore::GetDevice();
+		D3D11_QUERY_DESC queryDesc;
+		queryDesc.Query = types[type];
+		queryDesc.MiscFlags = 0;
+		device->CreateQuery(&queryDesc, &query_);
+	}
+
+	void Query::Destroy()
+	{
+		COMPTR_RELEASE(query_);
+	}
 
 #pragma endregion
 
