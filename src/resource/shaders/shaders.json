@@ -24,6 +24,12 @@
 		"PSEntry": "FxaaPS"
 	},
 	{
+		"Name": "TemporalAA",
+		"FileName": "TemporalAA.fx",
+		"VSEntry": "VS",
+		"PSEntry": "PS"
+	},
+	{
 		"Name": "RenderImgui",
 		"FileName": "Imgui.fx",
 		"VSEntry": "mainVS",

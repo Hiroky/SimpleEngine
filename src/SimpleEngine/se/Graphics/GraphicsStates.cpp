@@ -80,6 +80,40 @@ namespace se
 			HRESULT hr = device->CreateSamplerState(&sampDesc, &templates_[LinearClamp].state_);
 			THROW_IF_FAILED(hr);
 		}
+		{
+			D3D11_SAMPLER_DESC sampDesc;
+
+			sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			sampDesc.MipLODBias = 0.0f;
+			sampDesc.MaxAnisotropy = 8;
+			sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+			sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
+			sampDesc.MinLOD = 0;
+			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+			HRESULT hr = device->CreateSamplerState(&sampDesc, &templates_[AnisotropicClamp].state_);
+			THROW_IF_FAILED(hr);
+		}
+		{
+			D3D11_SAMPLER_DESC sampDesc;
+
+			sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+			sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			sampDesc.MipLODBias = 0.0f;
+			sampDesc.MaxAnisotropy = 8;
+			sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+			sampDesc.BorderColor[0] = sampDesc.BorderColor[1] = sampDesc.BorderColor[2] = sampDesc.BorderColor[3] = 0;
+			sampDesc.MinLOD = 0;
+			sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+			HRESULT hr = device->CreateSamplerState(&sampDesc, &templates_[AnisotropicWrap].state_);
+			THROW_IF_FAILED(hr);
+		}
 	}
 
 	SamplerState::SamplerState()
