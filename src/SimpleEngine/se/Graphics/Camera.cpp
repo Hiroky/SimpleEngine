@@ -27,6 +27,8 @@ namespace se
 		view_ = XMMatrixLookAtRH(eye.ToSIMD(), lookat.ToSIMD(), up.ToSIMD());
 		world_ = float4x4::Invert(view_);
 		position_ = eye;
+		at_ = lookat;
+		up_ = up;
 	}
 	void Camera::SetPerspective(float aspectRatio, float fieldOfView, float nearClip, float farClip)
 	{

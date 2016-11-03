@@ -11,14 +11,8 @@
     <ClInclude Include="se\Graphics\Graphics.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="se\Graphics\GraphicsContext.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="se\Common.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\Shader.h">
-      <Filter>src\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="se\Graphics\GraphicsCommon.h">
       <Filter>src\Graphics</Filter>
@@ -68,21 +62,6 @@
     <ClInclude Include="se\HID\HIDCore.h">
       <Filter>src\HID</Filter>
     </ClInclude>
-    <ClInclude Include="se\Graphics\GraphicsStates.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\DDSTextureLoader.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\GPUBuffer.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\GraphicsCore.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="se\Graphics\GPUProfiler.h">
-      <Filter>src\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="se\Graphics\StaticMesh.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
@@ -92,18 +71,33 @@
     <ClInclude Include="se\Graphics\Uniforms.h">
       <Filter>src\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="se\Graphics\DDSTextureLoader.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GPUBuffer.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GPUProfiler.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsContext.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsCore.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\GraphicsStates.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
+    <ClInclude Include="se\Graphics\Shader.h">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Graphics\Window.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="se\Graphics\GraphicsContext.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\Shader.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\imgui\imgui_draw.cpp">
       <Filter>thirdparty\imgui</Filter>
     </ClCompile>
@@ -119,26 +113,32 @@
     <ClCompile Include="se\HID\HIDCore.cpp">
       <Filter>src\HID</Filter>
     </ClCompile>
-    <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GPUBuffer.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GraphicsCore.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GraphicsStates.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="se\Graphics\GPUProfiler.cpp">
-      <Filter>src\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="se\Graphics\StaticMesh.cpp">
       <Filter>src\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="se\Graphics\Camera.cpp">
       <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GPUBuffer.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GPUProfiler.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsContext.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsCore.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\GraphicsStates.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
+    </ClCompile>
+    <ClCompile Include="se\Graphics\Shader.cpp">
+      <Filter>src\Graphics\D3D11</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +171,12 @@
     </Filter>
     <Filter Include="src\HID">
       <UniqueIdentifier>{8d0e3912-3472-4b06-92ae-c7947562e068}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics\D3D11">
+      <UniqueIdentifier>{7a79da73-e1b6-4617-8e64-db062693bb4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics\D3D12">
+      <UniqueIdentifier>{b9d84f13-0848-4f65-bc14-d41bc60b33ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

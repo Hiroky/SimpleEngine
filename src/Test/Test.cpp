@@ -132,12 +132,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	camera.SetLookAt(se::float3(3, 2, 0), se::float3(5, 2, 0), se::float3(0, 1, 0));
 	camera.SetPerspective(16.0f / 9.0f, se::DegreeToRadian(45.0f), 0.1f, 1000.0f);
 	camera.Build();
-	auto* meshShader = se::ShaderManager::Get().Find("OneTexture");
-	Assert(meshShader);
+	se::CameraController cameraController(camera);
 	viewUniforms.Contents().worldToView = se::float4x4::Transpose(camera.GetView());
 	viewUniforms.Contents().viewToClip = se::float4x4::Transpose(camera.GetProjection());
 	viewUniforms.Contents().worldToClip = se::float4x4::Transpose(camera.GetViewProjection());
 	objectUniforms.Contents().localToWorld = se::float4x4::ScaleMatrix(se::float3(0.01f));
+
+	auto* meshShader = se::ShaderManager::Get().Find("OneTexture");
+	Assert(meshShader);
 	const auto* meshLayout = se::VertexLayoutManager::Get().FindLayout(*meshShader->GetVS(), mesh.GetVertexBuffer().GetAttributes());
 
 	uint32_t jitterIndex = 0;
@@ -151,7 +153,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 			 * メイン 
 			 */
 			se::HIDCore::Update();
-
+			cameraController.Update();
 
 			/**
 			 * 描画
