@@ -14,3 +14,5 @@
 #include "se/Graphics/Camera.h"
 #include "se/Graphics/Uniforms.h"
 #include "se/Graphics/GPUProfiler.h"
+
+#include "se/Graphics/Atmosphere.h"

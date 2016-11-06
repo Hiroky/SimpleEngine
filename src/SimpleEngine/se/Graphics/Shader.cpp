@@ -428,6 +428,46 @@ namespace se
 		COMPTR_RELEASE(blob);
 	}
 
+	// === ComputeShader ====================================================================================
+
+	ComputeShader::ComputeShader()
+		: shader_(nullptr)
+	{
+	}
+
+	ComputeShader::~ComputeShader()
+	{
+		COMPTR_RELEASE(shader_);
+	}
+
+	void ComputeShader::Destroy()
+	{
+		COMPTR_RELEASE(shader_);
+	}
+
+	void ComputeShader::CreateFromByteCode(const void* data, int size)
+	{
+		HRESULT hr = GraphicsCore::GetDevice()->CreateComputeShader(data, size, nullptr, &shader_);
+		THROW_IF_FAILED(hr);
+	}
+
+	void ComputeShader::CompileFromFile(const char* fileName, const char* entryPoint)
+	{
+		ID3DBlob* blob = nullptr;
+		CompileShaderFromFile(fileName, entryPoint, "cs_5_0", &blob);
+		HRESULT hr = GraphicsCore::GetDevice()->CreateComputeShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader_);
+		THROW_IF_FAILED(hr);
+		COMPTR_RELEASE(blob);
+	}
+
+	void ComputeShader::CompileFromString(const char* source, int length, const char* entryPoint)
+	{
+		ID3DBlob* blob = nullptr;
+		CompileShaderFromString(source, length, entryPoint, "cs_5_0", &blob);
+		HRESULT hr = GraphicsCore::GetDevice()->CreateComputeShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &shader_);
+		THROW_IF_FAILED(hr);
+		COMPTR_RELEASE(blob);
+	}
 
 	// === ShaderSet ====================================================================================
 
@@ -492,11 +532,46 @@ namespace se
 			Printf("Shader Compile Failed.\n");
 			shaderMap_.clear();
 		}
+
+		try {
+			// コンピュートシェーダ定義ファイル読み込み
+			std::string directory = directoryPath;
+			directory += "\\";
+			std::string definisionFile = directory + "compute_shaders.json";
+			picojson::value json;
+			std::ifstream stream(definisionFile);
+			stream >> json;
+			stream.close();
+			picojson::array& defines = json.get<picojson::array>();
+
+			// シェーダコンパイル
+			auto hasher = std::hash<std::string>();
+			for (auto& s : defines) {
+				auto& obj = s.get<picojson::object>();
+				std::string name = obj["Name"].get<std::string>();
+				std::string fileName = directory + obj["FileName"].get<std::string>();
+				std::string vs = obj["Entry"].get<std::string>();
+
+				size_t shaderHash = hasher(name);
+				auto pair = csMap_.emplace(shaderHash, ComputeShader());
+				Assert(pair.second);
+				auto& shader = pair.first->second;
+
+				Printf("Shader Compile / %s : %s\n", name.c_str(), fileName.c_str());
+				shader.CompileFromFile(fileName.c_str(), vs.c_str());
+			}
+			directoryPath_ = directoryPath;
+		}
+		catch (...) {
+			Printf("Shader Compile Failed.\n");
+			shaderMap_.clear();
+		}
 	}
 
 	void ShaderManager::Finalize()
 	{
 		shaderMap_.clear();
+		csMap_.clear();
 	}
 
 	void ShaderManager::Reload()
@@ -541,5 +616,4 @@ namespace se
 			shaderMap_.clear();
 		}
 	}
-
 }

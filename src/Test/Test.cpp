@@ -13,6 +13,8 @@ namespace {
 	uint32_t currentBufferIndex = 0;
 	se::Texture texture;
 
+	se::Atmosphere atm;
+
 	// ハルトンシーケンス
 	float HaltonSequence(uint32_t index, uint32_t base)
 	{
@@ -47,22 +49,18 @@ void ProcImgui()
 {
 	se::ImGuiNewFrame();
 
-	{
-		// テストウインドウ
-		static bool open = true;
-		ImGuiWindowFlags window_flags = 0;
-		if (!ImGui::Begin("ImGui Demo", &open, window_flags)) {
-			ImGui::End();
-			return;
-		}
-
-		ImGui::Text("Dear ImGui says hello.");
-
-		float width = ImGui::GetContentRegionAvailWidth();
-		ImGui::Image(&texture, se::IMVec2(width, width * ((float)texture.GetHeight() / texture.GetWidth())));
-
-		ImGui::End();
-	}
+	//{
+	//	// テストウインドウ
+	//	static bool open = true;
+	//	ImGuiWindowFlags window_flags = 0;
+	//	if (!ImGui::Begin("ImGui Demo", &open, window_flags)) {
+	//		ImGui::End();
+	//	} else {
+	//		float width = ImGui::GetContentRegionAvailWidth();
+	//		ImGui::Image(&texture, se::IMVec2(width, width * ((float)texture.GetHeight() / texture.GetWidth())));
+	//		ImGui::End();
+	//	}
+	//}
 
 	// GPUプロファイラ
 	{
@@ -71,16 +69,17 @@ void ProcImgui()
 
 		if (!ImGui::Begin("GPU Profile", &gpuProfilerView, ImVec2(0, 0), 0.3f, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings)) {
 			ImGui::End();
-			return;
+		} else {
+			ImGui::Text("GPU Profiling");
+			ImGui::Separator();
+			if (profileTree) {
+				RenderProfileTree(profileTree, 0);
+			}
+			ImGui::End();
 		}
-
-		ImGui::Text("GPU Profiling");
-		ImGui::Separator();
-		if (profileTree) {
-			RenderProfileTree(profileTree, 0);
-		}
-		ImGui::End();
 	}
+
+	atm.DebugGUI();
 
 	se::ImGuiRender();
 }
@@ -104,6 +103,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	}
 	currentBufferIndex = 0;
 	auto* temporalAAShader = se::ShaderManager::Get().Find("TemporalAA");
+	auto* fxaaShader = se::ShaderManager::Get().Find("FXAA");
 	auto* quadShader = se::ShaderManager::Get().Find("ScreenQuad");
 	Assert(temporalAAShader && quadShader);
 
@@ -124,9 +124,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	texture.LoadFromFile("texture/test.dds");
 
 	// メッシュ
+#if 0
 	se::StaticMesh mesh;
 	mesh.Create("mesh/sponza/sponza.obj");
 	//mesh.Create("mesh/cube/cube.obj");
+	auto* meshShader = se::ShaderManager::Get().Find("OneTexture");
+	Assert(meshShader);
+	const auto* meshLayout = se::VertexLayoutManager::Get().FindLayout(*meshShader->GetVS(), mesh.GetVertexBuffer().GetAttributes());
+#endif
 
 	se::Camera camera;
 	camera.SetLookAt(se::float3(3, 2, 0), se::float3(5, 2, 0), se::float3(0, 1, 0));
@@ -138,11 +143,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 	viewUniforms.Contents().worldToClip = se::float4x4::Transpose(camera.GetViewProjection());
 	objectUniforms.Contents().localToWorld = se::float4x4::ScaleMatrix(se::float3(0.01f));
 
-	auto* meshShader = se::ShaderManager::Get().Find("OneTexture");
-	Assert(meshShader);
-	const auto* meshLayout = se::VertexLayoutManager::Get().FindLayout(*meshShader->GetVS(), mesh.GetVertexBuffer().GetAttributes());
 
+	bool enableTemporalAA = false;
 	uint32_t jitterIndex = 0;
+
+	atm.Initialize();
 
 	// メインループ
 	MSG msg = { 0 };
@@ -173,16 +178,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 
 				// temporal camera jitter
 				auto projection = camera.GetProjection();
-				float x = HaltonSequence(jitterIndex, 2) * 2.0f - 1.0f;
-				float y = HaltonSequence(jitterIndex, 3) * 2.0f - 1.0f;
-				jitterIndex = (jitterIndex + 1) & 0x7;
-				projection.m[2][0] = -x / se::GraphicsCore::GetDisplayWidth();
-				projection.m[2][1] = -y / se::GraphicsCore::GetDisplayHeight();
+				if (enableTemporalAA) {
+					float x = HaltonSequence(jitterIndex, 2) * 2.0f - 1.0f;
+					float y = HaltonSequence(jitterIndex, 3) * 2.0f - 1.0f;
+					jitterIndex = (jitterIndex + 1) & 0x7;
+					projection.m[2][0] = -x / se::GraphicsCore::GetDisplayWidth();
+					projection.m[2][1] = -y / se::GraphicsCore::GetDisplayHeight();
+				}
 				auto viewProjection = camera.GetView() * projection;
 				viewUniforms.Contents().worldToClip = se::float4x4::Transpose(viewProjection);
 				viewUniforms.Updated();
 				viewUniforms.Update(context);
 
+#if 0
 				// 3D render
 				{
 					seGpuPerfScope(context, 0, "3DRender");
@@ -208,9 +216,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 						context.DrawIndexed(shape.indexStart, shape.indexCount);
 					}
 				}
+#endif
 
-				// TemporalAA
-				{
+				// atmosphere
+				atm.Render(context);
+
+				if(enableTemporalAA) {
+					// TemporalAA
 					seGpuPerfScope(context, 0, "TemporalAA");
 					context.SetRenderTarget(&temporalBuffer[currentBufferIndex], 1, nullptr);
 					context.SetVertexShader(*temporalAAShader->GetVS());
@@ -237,6 +249,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,
 					context.DrawIndexed(0, 3);
 
 					currentBufferIndex ^= 1;
+				} else {
+					// FXAA
+					seGpuPerfScope(context, 0, "FXAA");
+					context.SetRenderTarget(&colorBuffer, 1, nullptr);
+					context.SetVertexShader(*temporalAAShader->GetVS());
+					context.SetPixelShader(*fxaaShader->GetPS());
+					context.SetInputLayout(*layout);
+					context.SetVertexBuffer(0, &vertexBuffer);
+					context.SetIndexBuffer(&indexBuffer);
+					context.SetPSResource(0, &currentBuffer);
+					context.SetPSSamplerState(0, se::SamplerState::Get(se::SamplerState::LinearClamp));
+					context.SetBlendState(se::BlendState::Get(se::BlendState::Opaque));
+					context.SetDepthStencilState(se::DepthStencilState::Get(se::DepthStencilState::Disable));
+					context.SetRasterizerState(se::RasterizerState::Get(se::RasterizerState::NoCull));
+					context.SetPrimitiveType(se::PRIMITIVE_TYPE_TRIANGLE_LIST);
+					context.DrawIndexed(0, 3);
+					context.SetPSResource(0, &se::ColorBuffer());
 				}
 			}
 

@@ -372,7 +372,7 @@ namespace se
 		depth_ = desc.ArraySize;
 	}
 
-	void ColorBuffer::Create2D(Format format, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t mips)
+	void ColorBuffer::Create2D(Format format, uint32_t width, uint32_t height, uint32_t arraySize, uint32_t mips, bool unorderedAccess)
 	{
 		Assert(!resource_);
 		mips = se::Max<uint32_t>(1, mips);
@@ -397,6 +397,8 @@ namespace se
 		objdesc.Usage = D3D11_USAGE_DEFAULT;
 		objdesc.CPUAccessFlags = 0;
 		objdesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+		if(unorderedAccess)
+			objdesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
 
 		//	テクスチャ生成
 		auto* device = GraphicsCore::GetDevice();
@@ -428,6 +430,22 @@ namespace se
 		rdesc.Texture2DArray.MipSlice = 0;
 		rdesc.Texture2DArray.FirstArraySlice = 0;
 		THROW_IF_FAILED(device->CreateRenderTargetView(texture, &rdesc, &rtv_));
+
+		// アンオーダードアクセスビューを生成
+		if (unorderedAccess) {
+			D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+			if (isArray) {
+				uavDesc.Texture2DArray.ArraySize = arraySize;
+				uavDesc.Texture2DArray.FirstArraySlice = 0;
+				uavDesc.Texture2DArray.MipSlice = 0;
+				uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+			} else {
+				uavDesc.Texture2D.MipSlice = 0;
+				uavDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+			}
+			uavDesc.Format = dxgiFormat;
+			THROW_IF_FAILED(GraphicsCore::GetDevice()->CreateUnorderedAccessView(resource_, &uavDesc, &uav_));
+		}
 	}
 
 	void ColorBuffer::Destroy()

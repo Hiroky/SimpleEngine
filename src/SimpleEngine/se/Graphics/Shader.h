@@ -133,6 +133,31 @@ namespace se
 	};
 
 	/**
+	 * コンピュートシェーダ
+	 */
+	class ComputeShader
+	{
+		friend GraphicsContext;
+		friend ShaderManager;
+
+	private:
+		ID3D11ComputeShader* shader_;
+
+	public:
+		ComputeShader();
+		~ComputeShader();
+		void Destroy();
+
+		ID3D11ComputeShader* Get() const { return shader_; }
+		void CreateFromByteCode(const void* data, int size);
+		void CompileFromFile(const char* fileName, const char* entryPoint = "main");
+		void CompileFromString(const char* source, int length, const char* entryPoint = "main");
+	};
+
+	#define TG(workItems, groupItems) ((workItems + groupItems - 1) / groupItems)
+
+
+	/**
 	 * シェーダセット
 	 */
 	class ShaderSet
@@ -170,6 +195,7 @@ namespace se
 	private:
 		std::string directoryPath_;
 		std::unordered_map<size_t, ShaderSet> shaderMap_;
+		std::unordered_map<size_t, ComputeShader> csMap_;
 
 	public:
 		void Initialize(const char* directoryPath);
@@ -185,6 +211,16 @@ namespace se
 		{
 			auto& iter = shaderMap_.find(hash);
 			return (iter != shaderMap_.end()) ? &iter->second : nullptr;
+		}
+		ComputeShader* FindCompute(const char* name)
+		{
+			static std::hash<std::string> hasher;
+			return FindCompute(hasher(name));
+		}
+		ComputeShader* FindCompute(size_t hash)
+		{
+			auto& iter = csMap_.find(hash);
+			return (iter != csMap_.end()) ? &iter->second : nullptr;
 		}
 	};
 

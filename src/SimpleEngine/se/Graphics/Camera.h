@@ -55,7 +55,7 @@ namespace se
 
 		const float MIN_ROTATION_X = DegreeToRadian(-89);
 		const float MAX_ROTATION_X = DegreeToRadian(89);
-		const float ROTATE_UNIT = 0.5f;
+		const float ROTATE_UNIT = 0.2f;
 		const float ZOOM_UNIT = 0.01f;
 		const float TRANCE_UNIT = 0.01f;
 

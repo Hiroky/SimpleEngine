@@ -60,6 +60,11 @@ namespace se
 		deviceContext_->PSSetShader(shader.Get(), nullptr, 0);
 	}
 
+	void GraphicsContext::SetComputeShader(const ComputeShader& shader)
+	{
+		deviceContext_->CSSetShader(shader.Get(), nullptr, 0);
+	}
+
 	void GraphicsContext::SetBlendState(const BlendState& blend)
 	{
 		deviceContext_->OMSetBlendState(blend.state_, 0, 0xFFFFFFFF);
@@ -152,6 +157,23 @@ namespace se
 		deviceContext_->PSSetSamplers(slot, 1, &sampler.state_);
 	}
 
+	void GraphicsContext::SetCSResource(uint32_t slot, const GPUResource* resource)
+	{
+		ID3D11ShaderResourceView* resources[] = { resource->GetSRV() };
+		deviceContext_->CSSetShaderResources(slot, 1, resources);
+	}
+
+	void GraphicsContext::SetCSSamplerState(uint32_t slot, const SamplerState& sampler)
+	{
+		deviceContext_->CSSetSamplers(slot, 1, &sampler.state_);
+	}
+
+	void GraphicsContext::SetCSUnorderedAccessView(uint32_t slot, const GPUResource* resource)
+	{
+		ID3D11UnorderedAccessView* resources[] = { resource->GetUAV() };
+		deviceContext_->CSSetUnorderedAccessViews(slot, 1, resources, nullptr);
+	}
+
 	void GraphicsContext::SetVSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer)
 	{
 		deviceContext_->VSSetConstantBuffers(slot, 1, &buffer.buffer_);
@@ -170,6 +192,11 @@ namespace se
 	void GraphicsContext::DrawIndexed(uint32_t indexStart, uint32_t indexCount, uint32_t vertexStart)
 	{
 		deviceContext_->DrawIndexed(indexCount, indexStart, vertexStart);
+	}
+
+	void GraphicsContext::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+	{
+		deviceContext_->Dispatch(x, y, z);
 	}
 
 	void * GraphicsContext::Map(GPUResource& resource, uint32_t subResource)

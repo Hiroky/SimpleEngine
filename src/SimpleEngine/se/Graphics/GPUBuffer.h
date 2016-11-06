@@ -62,6 +62,8 @@ namespace se
 
 		template <class T>
 		T* Get() const { return static_cast<T*>(resource_); }
+
+		bool IsCreated() const { return resource_ != nullptr; }
 	};
 
 	
@@ -151,7 +153,7 @@ namespace se
 		ColorBuffer();
 		virtual ~ColorBuffer();
 
-		void Create2D(Format format, uint32_t width, uint32_t height, uint32_t arraySize = 1u, uint32_t mips = 1u);
+		void Create2D(Format format, uint32_t width, uint32_t height, uint32_t arraySize = 1u, uint32_t mips = 1u, bool unorderedAccess = false);
 		// TODO:各種初期化対応
 		//void Initialize3D();
 		//void InitializeCube();

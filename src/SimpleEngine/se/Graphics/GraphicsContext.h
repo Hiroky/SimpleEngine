@@ -8,6 +8,7 @@ namespace se
 	struct VertexInputLayout;
 	class VertexShader;
 	class PixelShader;
+	class ComputeShader;
 	class ConstantBuffer;
 	class GPUResource;
 	class VertexBuffer;
@@ -45,6 +46,7 @@ namespace se
 		// Shader
 		void SetVertexShader(const VertexShader& shader);
 		void SetPixelShader(const PixelShader& shader);
+		void SetComputeShader(const ComputeShader& shader);
 
 		// RenderStates
 		void SetInputLayout(const VertexInputLayout& layout);
@@ -62,12 +64,16 @@ namespace se
 		void SetVSResource(uint32_t slot, const GPUResource* resource);
 		void SetPSResource(uint32_t slot, const GPUResource* resource);
 		void SetPSSamplerState(uint32_t slot, const SamplerState& sampler);
+		void SetCSResource(uint32_t slot, const GPUResource* resource);
+		void SetCSSamplerState(uint32_t slot, const SamplerState& sampler);
+		void SetCSUnorderedAccessView(uint32_t slot, const GPUResource* resource);
 		void SetVSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer);
 		void SetPSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer);
 		void SetCSConstantBuffer(uint32_t slot, const ConstantBuffer& buffer);
 
 		// Batching
 		void DrawIndexed(uint32_t indexStart, uint32_t indexCount, uint32_t vertexStart = 0);
+		void Dispatch(uint32_t x, uint32_t y, uint32_t z);
 
 		// Resource
 		void* Map(GPUResource& resource, uint32_t subResource = 0);

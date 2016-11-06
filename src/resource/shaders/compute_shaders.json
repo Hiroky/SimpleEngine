@@ -1,0 +1,7 @@
+[
+	{
+		"Name": "ComputeTransmittanceLUT",
+		"FileName": "Atmosphere.fx",
+		"Entry": "ComputeTransmittanceLUT",
+	},
+]

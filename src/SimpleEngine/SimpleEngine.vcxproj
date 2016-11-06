@@ -186,6 +186,7 @@
     <ClInclude Include="se\async\Threading.h" />
     <ClInclude Include="se\Debug\ImplImgui.h" />
     <ClInclude Include="se\engine.h" />
+    <ClInclude Include="se\Graphics\Atmosphere.h" />
     <ClInclude Include="se\Graphics\Camera.h" />
     <ClInclude Include="se\Graphics\DDSTextureLoader.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -241,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="se\Debug\ImplImgui.cpp" />
+    <ClCompile Include="se\Graphics\Atmosphere.cpp" />
     <ClCompile Include="se\Graphics\Camera.cpp" />
     <ClCompile Include="se\Graphics\DDSTextureLoader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
